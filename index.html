@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aledavisa C.A.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --azul-rey: #001aff; --celeste: #6bd1e3; --rosa: #ff2bb6; --fondo: #f8f9fc; --blanco: #ffffff; --texto: #333333; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--fondo); margin: 0; padding: 20px; color: var(--texto); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0; background: linear-gradient(90deg, var(--azul-rey), var(--celeste), var(--rosa)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header p { margin: 5px 0 0; color: #777; }
+        .form-container { background: var(--blanco); max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
+        .form-container h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Poppins', sans-serif; box-sizing: border-box; }
+        .form-group input:focus { border-color: var(--rosa); outline: none; }
+        .btn-guardar { width: 100%; padding: 15px; background: linear-gradient(90deg, var(--azul-rey), var(--rosa)); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: opacity 0.3s; font-family: 'Poppins', sans-serif; margin-top: 10px; }
+        .btn-guardar:hover { opacity: 0.9; }
+        .btn-guardar:disabled { background: #ccc; cursor: not-allowed; }
+        #mensaje-exito, #mensaje-error { display: none; text-align: center; margin-top: 15px; font-weight: 600; padding: 10px; border-radius: 8px; }
+        #mensaje-exito { background: #d4edda; color: #155724; }
+        #mensaje-error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Aledavisa C.A.</h1>
+        <p>Registro de Ventas y Contabilidad</p>
+    </div>
+    <div class="form-container">
+        <h2>Agregar Nuevo Registro</h2>
+        <form id="formulario-ventas">
+            <div class="form-group">
+                <label>Fecha</label>
+                <input type="date" id="fecha" required>
+            </div>
+            <div class="form-group">
+                <label>Nombre de la Clienta</label>
+                <input type="text" id="nombre" placeholder="Ej: María Pérez" required>
+            </div>
+            <div class="form-group">
+                <label>Descripción (Prenda / Trabajo)</label>
+                <input type="text" id="descripcion" placeholder="Ej: Vestido de flores talla M" required>
+            </div>
+            <div class="form-group">
+                <label>Mano de Obra ($)</label>
+                <input type="number" id="manoObra" placeholder="Ej: 5.00" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Total de la Venta ($)</label>
+                <input type="number" id="total" placeholder="Ej: 20.00" step="0.01" min="0" required>
+            </div>
+            <button type="submit" class="btn-guardar" id="btn-guardar">✨ Guardar en Excel ✨</button>
+            <div id="mensaje-exito">¡Guardado con éxito! 🎉</div>
+            <div id="mensaje-error">Ups, hubo un error. Revisa la conexión.</div>
+        </form>
+    </div>
+    <script>
+        document.getElementById('fecha').valueAsDate = new Date();
+        document.getElementById('formulario-ventas').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-guardar');
+            const msgExito = document.getElementById('mensaje-exito');
+            const msgError = document.getElementById('mensaje-error');
+            btn.textContent = "Guardando...";
+            btn.disabled = true;
+            msgExito.style.display = "none";
+            msgError.style.display = "none";
+            const fecha = document.getElementById('fecha').value;
+            const nombre = document.getElementById('nombre').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const manoObra = document.getElementById('manoObra').value;
+            const total = document.getElementById('total').value;
+            const datos = { fecha, nombre, descripcion, manoObra, total };
+            // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT ⚠️
+            const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
+            fetch(URL_GOOGLE, {
+                method: 'POST',
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "success") {
+                    msgExito.style.display = "block";
+                    document.getElementById('formulario-ventas').reset();
+                    document.getElementById('fecha').valueAsDate = new Date();
+                    btn.textContent = "✨ Guardar en Excel ✨";
+                    btn.disabled = false;
+                } else {
+                    throw new Error("Error en Google Sheets");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                msgError.style.display = "block";
+                btn.textContent = "✨ Guardar en Excel ✨";
+                btn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
