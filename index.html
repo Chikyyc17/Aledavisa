@@ -25,28 +25,22 @@
             min-height: 100vh;
         }
         
-        /* --- ESTILOS DEL ENCABEZADO Y EL LOGO --- */
-        .header { 
-            text-align: center; 
-            margin-bottom: 25px; 
-        }
+        /* --- ENCABEZADO Y LOGO --- */
+        .header { text-align: center; margin-bottom: 25px; }
         .logo {
-            max-width: 300px; /* Tamaño máximo del logo */
+            max-width: 300px;
             width: 100%;
             height: auto;
-            margin-bottom: 15px; /* Separación entre el logo y el texto de abajo */
+            margin-bottom: 15px;
             display: inline-block;
-            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.05)); /* Una sombrita suave para que resalte */
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.05));
         }
         .header p { 
-            margin: 5px 0 0; 
-            color: #777; 
-            font-size: 0.9rem; 
-            text-transform: uppercase; 
-            letter-spacing: 2px;
+            margin: 5px 0 0; color: #777; font-size: 0.9rem; 
+            text-transform: uppercase; letter-spacing: 2px;
         }
         
-        /* TARJETA DEL TOTAL DEL MES */
+        /* --- TARJETA DEL TOTAL DEL MES (CON PRIVACIDAD) --- */
         .tarjeta-total {
             background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
             backdrop-filter: blur(10px);
@@ -60,11 +54,16 @@
             border-bottom: 4px solid var(--rosa);
         }
         .tarjeta-total h3 {
-            margin: 0 0 10px;
-            font-size: 1rem;
-            color: #666;
-            font-weight: 600;
-            letter-spacing: 1px;
+            margin: 0 0 10px; font-size: 1rem; color: #666; 
+            font-weight: 600; letter-spacing: 1px;
+        }
+        
+        /* Contenedor del monto y el ojito */
+        .monto-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* Separación entre el número y el ojito */
         }
         .tarjeta-total .monto {
             font-family: 'Playfair Display', serif;
@@ -73,8 +72,20 @@
             color: var(--azul-rey);
             margin: 0;
             line-height: 1;
+            transition: all 0.3s;
         }
+        .btn-ojo {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .btn-ojo:hover { opacity: 1; transform: scale(1.1); }
 
+        /* --- FORMULARIO --- */
         .form-container {
             background: var(--blanco);
             max-width: 500px;
@@ -86,63 +97,56 @@
         .form-container h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; font-size: 1.5rem; color: var(--texto); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; color: #555;}
+        
+        /* SOLUCIÓN AL ZOOM: font-size de 16px */
         .form-group input {
             width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px;
             font-family: 'Poppins', sans-serif; box-sizing: border-box;
             transition: border-color 0.3s;
             background-color: #fafafa;
+            font-size: 16px; /* ESTO EVITA EL ZOOM EN CELULARES */
         }
         .form-group input:focus { border-color: var(--celeste); outline: none; background-color: var(--blanco); }
         
         .btn-guardar {
-            width: 100%;
-            padding: 15px;
+            width: 100%; padding: 15px;
             background: linear-gradient(90deg, var(--azul-rey), var(--rosa));
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
+            color: white; border: none; border-radius: 10px;
+            font-size: 1.1rem; font-weight: 600; cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            font-family: 'Poppins', sans-serif;
-            margin-top: 10px;
+            font-family: 'Poppins', sans-serif; margin-top: 10px;
             box-shadow: 0 5px 15px rgba(255, 43, 182, 0.3);
         }
         .btn-guardar:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 43, 182, 0.4); }
         .btn-guardar:disabled { background: #ccc; box-shadow: none; transform: none; cursor: not-allowed; }
         
         #mensaje-exito, #mensaje-error {
-            display: none;
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 600;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 0.9rem;
+            display: none; text-align: center; margin-top: 15px;
+            font-weight: 600; padding: 12px; border-radius: 10px; font-size: 0.9rem;
         }
         #mensaje-exito { background: #e8f8f5; color: #1abc9c; }
         #mensaje-error { background: #fdedec; color: #e74c3c; }
         
         @media (max-width: 600px) {
-            .logo { max-width: 220px; } /* El logo se hace un poco más pequeño en celulares */
+            .logo { max-width: 220px; }
             .tarjeta-total .monto { font-size: 2.8rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ENCABEZADO CON EL LOGO -->
     <div class="header">
-        <!-- Aquí se carga la imagen. Asegúrate de que se llame logo.png o logo.jpg -->
         <img src="logo.png" alt="Logo Aledavisa C.A." class="logo">
         <p>Registro de Ganancias (Mano de Obra)</p>
     </div>
 
-    <!-- TARJETA DINÁMICA DEL MES -->
+    <!-- TARJETA DINÁMICA CON BOTÓN DE OJITO -->
     <div class="tarjeta-total">
         <h3>GANANCIA POR MANO DE OBRA ESTE MES</h3>
-        <p class="monto" id="total-mes">Cargando...</p>
+        <div class="monto-container">
+            <p class="monto" id="total-mes">••••••</p>
+            <button id="btn-ojo" class="btn-ojo" aria-label="Mostrar/Ocultar total">👁️</button>
+        </div>
     </div>
 
     <div class="form-container">
@@ -172,39 +176,61 @@
     </div>
 
     <script>
-        // URL DE GOOGLE APPS SCRIPT
         const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
 
-        // 1. Poner la fecha de hoy automáticamente
+        // Variables para controlar la privacidad
+        let mostrarTotal = false;
+        let valorTotalMes = 0;
+
         document.getElementById('fecha').valueAsDate = new Date();
 
-        // 2. Función para consultar y mostrar la mano de obra del mes
-        function actualizarTotalMes() {
+        // Función para formatear y mostrar/ocultar el dinero
+        function renderizarTotal() {
             const displayTotal = document.getElementById('total-mes');
-            
+            if (mostrarTotal) {
+                const formatoMoneda = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                });
+                displayTotal.textContent = formatoMoneda.format(valorTotalMes);
+            } else {
+                displayTotal.textContent = "••••••";
+            }
+        }
+
+        // Función que consulta a Google Sheets
+        function actualizarTotalMes() {
             fetch(URL_GOOGLE)
                 .then(response => response.json())
                 .then(data => {
                     if(data.status === "success") {
-                        const formatoMoneda = new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: 'USD'
-                        });
-                        displayTotal.textContent = formatoMoneda.format(data.totalMes);
+                        valorTotalMes = data.totalMes; // Guardamos el valor real
+                        renderizarTotal(); // Lo dibujamos dependiendo de si está oculto o no
                     } else {
-                        displayTotal.textContent = "$0.00";
+                        valorTotalMes = 0;
+                        renderizarTotal();
                     }
                 })
                 .catch(error => {
                     console.error('Error al cargar total:', error);
-                    displayTotal.textContent = "Error";
+                    document.getElementById('total-mes').textContent = "Error";
                 });
         }
 
-        // Cargar el total apenas se abra la página
+        // Evento del botón del ojito
+        document.getElementById('btn-ojo').addEventListener('click', function() {
+            mostrarTotal = !mostrarTotal; // Cambia entre true y false
+            if(mostrarTotal) {
+                this.textContent = "🙈"; // Cambia el icono
+            } else {
+                this.textContent = "👁️"; 
+            }
+            renderizarTotal();
+        });
+
         actualizarTotalMes();
 
-        // 3. Enviar el formulario
+        // Evento para guardar la venta
         document.getElementById('formulario-ventas').addEventListener('submit', function(e) {
             e.preventDefault();
             
