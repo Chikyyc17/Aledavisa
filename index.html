@@ -1,35 +1,138 @@
-<!DOCTYPE html>
+}<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aledavisa C.A.</title>
+    <title>Aledavisa C.A. - Panel de Ventas</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --azul-rey: #001aff; --celeste: #6bd1e3; --rosa: #ff2bb6; --fondo: #f8f9fc; --blanco: #ffffff; --texto: #333333; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--fondo); margin: 0; padding: 20px; color: var(--texto); }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0; background: linear-gradient(90deg, var(--azul-rey), var(--celeste), var(--rosa)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header p { margin: 5px 0 0; color: #777; }
-        .form-container { background: var(--blanco); max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
-        .form-container h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; }
+        :root {
+            --azul-rey: #001aff;
+            --celeste: #6bd1e3;
+            --rosa: #ff2bb6;
+            --fondo: #f4f7f6;
+            --blanco: #ffffff;
+            --texto: #2c3e50;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--fondo);
+            background-image: radial-gradient(circle at top right, rgba(107, 209, 227, 0.2), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(255, 43, 182, 0.1), transparent 40%);
+            margin: 0;
+            padding: 20px;
+            color: var(--texto);
+            min-height: 100vh;
+        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            margin: 0;
+            background: linear-gradient(90deg, var(--azul-rey), var(--celeste), var(--rosa));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+        }
+        .header p { margin: 5px 0 0; color: #777; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px;}
+        
+        /* TARJETA DEL TOTAL DEL MES */
+        .tarjeta-total {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            margin: 0 auto 25px;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,26,255,0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+            text-align: center;
+            border-bottom: 4px solid var(--rosa);
+        }
+        .tarjeta-total h3 {
+            margin: 0 0 10px;
+            font-size: 1rem;
+            color: #666;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .tarjeta-total .monto {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            color: var(--azul-rey);
+            margin: 0;
+            line-height: 1;
+        }
+
+        .form-container {
+            background: var(--blanco);
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+        }
+        .form-container h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; font-size: 1.5rem; color: var(--texto); }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Poppins', sans-serif; box-sizing: border-box; }
-        .form-group input:focus { border-color: var(--rosa); outline: none; }
-        .btn-guardar { width: 100%; padding: 15px; background: linear-gradient(90deg, var(--azul-rey), var(--rosa)); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: opacity 0.3s; font-family: 'Poppins', sans-serif; margin-top: 10px; }
-        .btn-guardar:hover { opacity: 0.9; }
-        .btn-guardar:disabled { background: #ccc; cursor: not-allowed; }
-        #mensaje-exito, #mensaje-error { display: none; text-align: center; margin-top: 15px; font-weight: 600; padding: 10px; border-radius: 8px; }
-        #mensaje-exito { background: #d4edda; color: #155724; }
-        #mensaje-error { background: #f8d7da; color: #721c24; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; color: #555;}
+        .form-group input {
+            width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px;
+            font-family: 'Poppins', sans-serif; box-sizing: border-box;
+            transition: border-color 0.3s;
+            background-color: #fafafa;
+        }
+        .form-group input:focus { border-color: var(--celeste); outline: none; background-color: var(--blanco); }
+        
+        .btn-guardar {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, var(--azul-rey), var(--rosa));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(255, 43, 182, 0.3);
+        }
+        .btn-guardar:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 43, 182, 0.4); }
+        .btn-guardar:disabled { background: #ccc; box-shadow: none; transform: none; cursor: not-allowed; }
+        
+        #mensaje-exito, #mensaje-error {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        #mensaje-exito { background: #e8f8f5; color: #1abc9c; }
+        #mensaje-error { background: #fdedec; color: #e74c3c; }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2.2rem; }
+            .tarjeta-total .monto { font-size: 2.8rem; }
+        }
     </style>
 </head>
 <body>
+
     <div class="header">
         <h1>Aledavisa C.A.</h1>
-        <p>Registro de Ventas y Contabilidad</p>
+        <p>Registro de Ganancias (Mano de Obra)</p>
     </div>
+
+    <!-- TARJETA DINÁMICA DEL MES -->
+    <div class="tarjeta-total">
+        <h3>GANANCIA POR MANO DE OBRA ESTE MES</h3>
+        <p class="monto" id="total-mes">Cargando...</p>
+    </div>
+
     <div class="form-container">
         <h2>Agregar Nuevo Registro</h2>
         <form id="formulario-ventas">
@@ -43,40 +146,73 @@
             </div>
             <div class="form-group">
                 <label>Descripción (Prenda / Trabajo)</label>
-                <input type="text" id="descripcion" placeholder="Ej: Vestido de flores talla M" required>
+                <input type="text" id="descripcion" placeholder="Ej: Vestido de flores" required>
             </div>
             <div class="form-group">
-                <label>Mano de Obra ($)</label>
-                <input type="number" id="manoObra" placeholder="Ej: 5.00" step="0.01" min="0" required>
+                <label>Mano de Obra ($) - Ganancia</label>
+                <input type="number" id="manoObra" placeholder="Ej: 15.00" step="0.01" min="0" required>
             </div>
-            <div class="form-group">
-                <label>Total de la Venta ($)</label>
-                <input type="number" id="total" placeholder="Ej: 20.00" step="0.01" min="0" required>
-            </div>
+            
             <button type="submit" class="btn-guardar" id="btn-guardar">✨ Guardar en Excel ✨</button>
             <div id="mensaje-exito">¡Guardado con éxito! 🎉</div>
             <div id="mensaje-error">Ups, hubo un error. Revisa la conexión.</div>
         </form>
     </div>
+
     <script>
+        // URL DE GOOGLE APPS SCRIPT
+        const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
+
+        // 1. Poner la fecha de hoy automáticamente
         document.getElementById('fecha').valueAsDate = new Date();
+
+        // 2. Función para consultar y mostrar la mano de obra del mes
+        function actualizarTotalMes() {
+            const displayTotal = document.getElementById('total-mes');
+            
+            fetch(URL_GOOGLE)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        const formatoMoneda = new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD'
+                        });
+                        displayTotal.textContent = formatoMoneda.format(data.totalMes);
+                    } else {
+                        displayTotal.textContent = "$0.00";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar total:', error);
+                    displayTotal.textContent = "Error";
+                });
+        }
+
+        // Cargar el total apenas se abra la página
+        actualizarTotalMes();
+
+        // 3. Enviar el formulario
         document.getElementById('formulario-ventas').addEventListener('submit', function(e) {
             e.preventDefault();
+            
             const btn = document.getElementById('btn-guardar');
             const msgExito = document.getElementById('mensaje-exito');
             const msgError = document.getElementById('mensaje-error');
+            
             btn.textContent = "Guardando...";
             btn.disabled = true;
             msgExito.style.display = "none";
             msgError.style.display = "none";
+
             const fecha = document.getElementById('fecha').value;
             const nombre = document.getElementById('nombre').value;
             const descripcion = document.getElementById('descripcion').value;
             const manoObra = document.getElementById('manoObra').value;
-            const total = document.getElementById('total').value;
-            const datos = { fecha, nombre, descripcion, manoObra, total };
-            // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT ⚠️
-            const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
+
+            // Solo enviamos los 4 campos
+            const datos = { fecha, nombre, descripcion, manoObra };
+
             fetch(URL_GOOGLE, {
                 method: 'POST',
                 body: JSON.stringify(datos)
@@ -86,9 +222,14 @@
                 if(data.status === "success") {
                     msgExito.style.display = "block";
                     document.getElementById('formulario-ventas').reset();
-                    document.getElementById('fecha').valueAsDate = new Date();
+                    document.getElementById('fecha').valueAsDate = new Date(); 
+                    
+                    actualizarTotalMes(); 
+
                     btn.textContent = "✨ Guardar en Excel ✨";
                     btn.disabled = false;
+                    
+                    setTimeout(() => { msgExito.style.display = "none"; }, 3000);
                 } else {
                     throw new Error("Error en Google Sheets");
                 }
