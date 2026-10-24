@@ -1,4 +1,4 @@
-}<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -24,17 +24,27 @@
             color: var(--texto);
             min-height: 100vh;
         }
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.8rem;
-            margin: 0;
-            background: linear-gradient(90deg, var(--azul-rey), var(--celeste), var(--rosa));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 600;
+        
+        /* --- ESTILOS DEL ENCABEZADO Y EL LOGO --- */
+        .header { 
+            text-align: center; 
+            margin-bottom: 25px; 
         }
-        .header p { margin: 5px 0 0; color: #777; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px;}
+        .logo {
+            max-width: 300px; /* Tamaño máximo del logo */
+            width: 100%;
+            height: auto;
+            margin-bottom: 15px; /* Separación entre el logo y el texto de abajo */
+            display: inline-block;
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.05)); /* Una sombrita suave para que resalte */
+        }
+        .header p { 
+            margin: 5px 0 0; 
+            color: #777; 
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
         
         /* TARJETA DEL TOTAL DEL MES */
         .tarjeta-total {
@@ -115,15 +125,17 @@
         #mensaje-error { background: #fdedec; color: #e74c3c; }
         
         @media (max-width: 600px) {
-            .header h1 { font-size: 2.2rem; }
+            .logo { max-width: 220px; } /* El logo se hace un poco más pequeño en celulares */
             .tarjeta-total .monto { font-size: 2.8rem; }
         }
     </style>
 </head>
 <body>
 
+    <!-- ENCABEZADO CON EL LOGO -->
     <div class="header">
-        <h1>Aledavisa C.A.</h1>
+        <!-- Aquí se carga la imagen. Asegúrate de que se llame logo.png o logo.jpg -->
+        <img src="logo.png" alt="Logo Aledavisa C.A." class="logo">
         <p>Registro de Ganancias (Mano de Obra)</p>
     </div>
 
@@ -210,7 +222,6 @@
             const descripcion = document.getElementById('descripcion').value;
             const manoObra = document.getElementById('manoObra').value;
 
-            // Solo enviamos los 4 campos
             const datos = { fecha, nombre, descripcion, manoObra };
 
             fetch(URL_GOOGLE, {
