@@ -2,25 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aledavisa C.A. - App</title>
     
-    <!-- 👇 ESTA ES LA LÍNEA MÁGICA PARA EL LOGUITO EN LA PESTAÑA 👇 -->
+    <!-- FAVICON Y PWA -->
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#001aff">
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --azul-rey: #001aff;
-            --celeste: #6bd1e3;
-            --rosa: #ff2bb6;
-            --fondo: #f4f7f6;
-            --blanco: #ffffff;
-            --texto: #2c3e50;
+            --azul-rey: #001aff; --celeste: #6bd1e3; --rosa: #ff2bb6;
+            --fondo: #f4f7f6; --blanco: #ffffff; --texto: #2c3e50; --rojo: #e74c3c;
         }
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--fondo);
+            font-family: 'Poppins', sans-serif; background-color: var(--fondo);
             background-image: radial-gradient(circle at top right, rgba(107, 209, 227, 0.2), transparent 40%),
                               radial-gradient(circle at bottom left, rgba(255, 43, 182, 0.1), transparent 40%);
             margin: 0; padding: 20px; color: var(--texto); min-height: 100vh;
@@ -29,10 +26,10 @@
         .header { text-align: center; margin-bottom: 20px; }
         .logo { max-width: 250px; width: 100%; height: auto; margin-bottom: 10px; }
         
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
         .tab-btn {
-            padding: 12px 25px; border: none; border-radius: 30px;
-            font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600;
+            padding: 12px 20px; border: none; border-radius: 30px;
+            font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 600;
             cursor: pointer; background: var(--blanco); color: #777;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.3s;
         }
@@ -70,6 +67,9 @@
         }
         .form-group input:focus, .form-group textarea:focus { border-color: var(--celeste); outline: none; background: #fff; }
         
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
+
         .btn-principal {
             width: 100%; padding: 15px; background: linear-gradient(90deg, var(--azul-rey), var(--rosa));
             color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600;
@@ -84,39 +84,41 @@
             margin-top: 10px; display: none; font-family: 'Poppins', sans-serif;
         }
 
-        .pedido-item {
+        /* TARJETAS GENERALES (PEDIDOS E INVENTARIO) */
+        .item-card {
             background: var(--blanco); max-width: 500px; margin: 0 auto 15px;
             padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             border-left: 6px solid var(--celeste); display: flex; justify-content: space-between; align-items: center;
         }
-        .pedido-item.urgente { border-left-color: var(--rosa); }
-        .pedido-info h4 { margin: 0 0 5px; font-size: 1.1rem; color: var(--texto); }
-        .pedido-info p { margin: 0; font-size: 0.85rem; color: #666; }
-        .pedido-info .fecha { font-weight: 600; color: var(--azul-rey); margin-top: 5px; display: block; }
+        .item-card.urgente { border-left-color: var(--rosa); }
+        .item-card.alerta-stock { border-left-color: var(--rojo); background: #fff5f5; }
+        
+        .item-info h4 { margin: 0 0 5px; font-size: 1.1rem; color: var(--texto); }
+        .item-info p { margin: 0; font-size: 0.85rem; color: #666; }
+        .item-info .dato { font-weight: 600; color: var(--azul-rey); margin-top: 5px; display: block; }
+        .item-info .dato.rojo { color: var(--rojo); }
         
         .acciones { display: flex; gap: 10px; }
-        .btn-accion {
-            border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: background 0.3s;
-        }
+        .btn-accion { border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: background 0.3s; }
         .btn-editar { background: #e8f8f5; color: #1abc9c; }
         .btn-editar:hover { background: #1abc9c; color: white; }
         .btn-borrar { background: #fdedec; color: #e74c3c; }
         .btn-borrar:hover { background: #e74c3c; color: white; }
 
-        #mensaje-exito, #mensaje-error, #msg-pedido-exito, #msg-pedido-error {
+        #mensaje-exito, #mensaje-error, #msg-pedido-exito, #msg-pedido-error, #msg-inv-exito, #msg-inv-error {
             display: none; text-align: center; margin-top: 15px; font-weight: 600;
             padding: 12px; border-radius: 10px; font-size: 0.9rem;
         }
         .exito { background: #e8f8f5; color: #1abc9c; }
         .error { background: #fdedec; color: #e74c3c; }
-        
         .cargando { text-align: center; color: #888; font-style: italic; margin-top: 20px; }
         
         @media (max-width: 600px) {
             .monto { font-size: 2.8rem; }
-            .pedido-item { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .item-card { flex-direction: column; align-items: flex-start; gap: 15px; }
             .acciones { width: 100%; justify-content: flex-end; }
             .btn-accion { flex: 1; }
+            .tabs { flex-direction: column; }
         }
     </style>
 </head>
@@ -129,8 +131,10 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="cambiarSeccion('ganancias', this)">💰 Ganancias</button>
         <button class="tab-btn" onclick="cambiarSeccion('pedidos', this)">👗 Pedidos</button>
+        <button class="tab-btn" onclick="cambiarSeccion('inventario', this)">🧵 Inventario</button>
     </div>
 
+    <!-- SECCIÓN 1: GANANCIAS -->
     <div id="seccion-ganancias" class="seccion active">
         <div class="tarjeta-total">
             <h3>GANANCIA POR MANO DE OBRA ESTE MES</h3>
@@ -166,12 +170,12 @@
         </div>
     </div>
 
+    <!-- SECCIÓN 2: PEDIDOS -->
     <div id="seccion-pedidos" class="seccion">
         <div class="card">
             <h2 id="titulo-form-pedido">Agregar Nuevo Pedido</h2>
             <form id="formulario-pedidos">
                 <input type="hidden" id="idEdicion">
-                
                 <div class="form-group">
                     <label>Fecha del Pedido</label>
                     <input type="date" id="fechaPedido" required>
@@ -188,23 +192,70 @@
                     <label>Descripción del Pedido</label>
                     <textarea id="descPedido" rows="2" placeholder="Ej: Blusa manga corta, talla S" required></textarea>
                 </div>
-                
                 <button type="submit" class="btn-principal" id="btn-guardar-pedido">📝 Guardar Pedido 📝</button>
                 <button type="button" class="btn-cancelar" id="btn-cancelar-edicion" onclick="cancelarEdicion()">Cancelar Edición</button>
-                
                 <div id="msg-pedido-exito" class="exito">¡Pedido guardado! 🎉</div>
                 <div id="msg-pedido-error" class="error">Ups, hubo un error.</div>
             </form>
         </div>
-
         <h3 style="text-align: center; color: #666; margin-top: 30px;">Pedidos por Entregar</h3>
         <div id="lista-pedidos"></div>
+    </div>
+
+    <!-- SECCIÓN 3: INVENTARIO -->
+    <div id="seccion-inventario" class="seccion">
+        <div class="card">
+            <h2 id="titulo-form-inv">Agregar Material</h2>
+            <form id="formulario-inventario">
+                <input type="hidden" id="idInvEdicion">
+                <div class="form-group">
+                    <label>Nombre del Material</label>
+                    <input type="text" id="invNombre" placeholder="Ej: Hilo Rojo, Tela Seda" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cantidad Actual</label>
+                        <input type="number" id="invCantidad" placeholder="Ej: 5" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Unidad</label>
+                        <select id="invUnidad" style="width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-family: 'Poppins'; font-size: 16px; background: #fafafa;">
+                            <option value="Unidades">Unidades</option>
+                            <option value="Metros">Metros</option>
+                            <option value="Conos">Conos</option>
+                            <option value="Rollos">Rollos</option>
+                            <option value="Docenas">Docenas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Stock Mínimo (Alerta en Rojo)</label>
+                    <input type="number" id="invStockMin" placeholder="Ej: 2" step="0.01" required>
+                </div>
+                <button type="submit" class="btn-principal" id="btn-guardar-inv">📦 Guardar Material 📦</button>
+                <button type="button" class="btn-cancelar" id="btn-cancelar-inv" onclick="cancelarEdicionInv()">Cancelar Edición</button>
+                <div id="msg-inv-exito" class="exito">¡Material guardado! 🎉</div>
+                <div id="msg-inv-error" class="error">Ups, hubo un error.</div>
+            </form>
+        </div>
+        <h3 style="text-align: center; color: #666; margin-top: 30px;">Materiales en el Taller</h3>
+        <div id="lista-inventario"></div>
     </div>
 
     <script>
         const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
         
+        // REGISTRAR SERVICE WORKER PARA LA PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA lista', reg))
+                    .catch(err => console.log('Error PWA', err));
+            });
+        }
+
         let pedidosGlobal = []; 
+        let inventarioGlobal = [];
 
         function cambiarSeccion(idSeccion, btn) {
             document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
@@ -212,11 +263,9 @@
             document.getElementById('seccion-' + idSeccion).classList.add('active');
             btn.classList.add('active');
 
-            if(idSeccion === 'pedidos') {
-                cargarPedidos();
-            } else {
-                actualizarTotalMes();
-            }
+            if(idSeccion === 'pedidos') cargarPedidos();
+            else if(idSeccion === 'inventario') cargarInventario();
+            else actualizarTotalMes();
         }
 
         // --- LÓGICA DE GANANCIAS ---
@@ -282,6 +331,7 @@
                 .finally(() => { btn.textContent = "✨ Guardar Ganancia ✨"; btn.disabled = false; });
         });
 
+        // --- UTILIDAD DE FECHAS ---
         function fechaParaInput(fechaRaw) {
             if (!fechaRaw) return "";
             const d = new Date(fechaRaw);
@@ -298,7 +348,6 @@
         function cargarPedidos() {
             const contenedor = document.getElementById('lista-pedidos');
             contenedor.innerHTML = "<p class='cargando'>Cargando pedidos...</p>";
-
             const urlAntiCache = URL_GOOGLE + "?action=getOrders&nocache=" + new Date().getTime();
 
             fetch(urlAntiCache, { cache: "no-store" })
@@ -307,51 +356,37 @@
                     if(data.status === "success" && data.orders.length > 0) {
                         pedidosGlobal = data.orders; 
                         data.orders.sort((a, b) => new Date(a.fechaEntrega) - new Date(b.fechaEntrega));
-                        
                         contenedor.innerHTML = "";
-                        const hoy = new Date();
-                        hoy.setHours(0,0,0,0);
+                        const hoy = new Date(); hoy.setHours(0,0,0,0);
 
                         data.orders.forEach(pedido => {
                             const fechaLimpia = fechaParaInput(pedido.fechaEntrega);
                             const fechaEntregaObj = new Date(fechaLimpia + 'T00:00:00');
+                            const diffDias = Math.ceil((fechaEntregaObj - hoy) / (1000 * 60 * 60 * 24));
                             
-                            const diffTiempo = fechaEntregaObj - hoy;
-                            const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
-                            
-                            let claseUrgente = "";
-                            let textoDias = "";
-                            
+                            let claseUrgente = ""; let textoDias = "";
                             if(diffDias <= 2 && diffDias >= 0) {
-                                claseUrgente = "urgente";
-                                textoDias = diffDias === 0 ? "(¡HOY!)" : `(En ${diffDias} días)`;
+                                claseUrgente = "urgente"; textoDias = diffDias === 0 ? "(¡HOY!)" : `(En ${diffDias} días)`;
                             } else if (diffDias < 0) {
-                                claseUrgente = "urgente";
-                                textoDias = "(¡ATRASADO!)";
-                            } else {
-                                textoDias = `(En ${diffDias} días)`;
-                            }
+                                claseUrgente = "urgente"; textoDias = "(¡ATRASADO!)";
+                            } else { textoDias = `(En ${diffDias} días)`; }
 
                             const fechaFormat = fechaEntregaObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-
                             const div = document.createElement('div');
-                            div.className = `pedido-item ${claseUrgente}`;
+                            div.className = `item-card ${claseUrgente}`;
                             div.innerHTML = `
-                                <div class="pedido-info">
+                                <div class="item-info">
                                     <h4>${pedido.nombre}</h4>
                                     <p>${pedido.descripcion}</p>
-                                    <span class="fecha">Entrega: ${fechaFormat} <small>${textoDias}</small></span>
+                                    <span class="dato">Entrega: ${fechaFormat} <small>${textoDias}</small></span>
                                 </div>
                                 <div class="acciones">
                                     <button class="btn-accion btn-editar" onclick="prepararEdicion('${pedido.id}')">✏️</button>
                                     <button class="btn-accion btn-borrar" onclick="borrarPedido('${pedido.id}')">🗑️</button>
-                                </div>
-                            `;
+                                </div>`;
                             contenedor.appendChild(div);
                         });
-                    } else {
-                        contenedor.innerHTML = "<p class='cargando'>No hay pedidos pendientes. ¡A descansar! ☕</p>";
-                    }
+                    } else { contenedor.innerHTML = "<p class='cargando'>No hay pedidos pendientes. ¡A descansar! ☕</p>"; }
                 })
                 .catch(err => { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar pedidos.</p>"; });
         }
@@ -359,17 +394,14 @@
         function prepararEdicion(id) {
             const pedido = pedidosGlobal.find(p => p.id.toString() === id.toString());
             if(!pedido) return;
-
             document.getElementById('idEdicion').value = pedido.id;
             document.getElementById('fechaPedido').value = fechaParaInput(pedido.fechaPedido);
             document.getElementById('fechaEntrega').value = fechaParaInput(pedido.fechaEntrega);
             document.getElementById('nombrePedido').value = pedido.nombre;
             document.getElementById('descPedido').value = pedido.descripcion;
-
             document.getElementById('titulo-form-pedido').textContent = "Modificar Pedido";
             document.getElementById('btn-guardar-pedido').textContent = "💾 Actualizar Pedido 💾";
             document.getElementById('btn-cancelar-edicion').style.display = "block";
-
             document.getElementById('formulario-pedidos').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -377,7 +409,6 @@
             document.getElementById('idEdicion').value = "";
             document.getElementById('formulario-pedidos').reset();
             document.getElementById('fechaPedido').valueAsDate = new Date();
-            
             document.getElementById('titulo-form-pedido').textContent = "Agregar Nuevo Pedido";
             document.getElementById('btn-guardar-pedido').textContent = "📝 Guardar Pedido 📝";
             document.getElementById('btn-cancelar-edicion').style.display = "none";
@@ -387,10 +418,8 @@
             e.preventDefault();
             const btn = document.getElementById('btn-guardar-pedido');
             btn.textContent = "Guardando..."; btn.disabled = true;
-            
             const idEdicion = document.getElementById('idEdicion').value;
             const esEdicion = idEdicion !== "";
-
             const datos = {
                 action: esEdicion ? "updateOrder" : "saveOrder",
                 id: esEdicion ? idEdicion : null,
@@ -399,14 +428,12 @@
                 nombre: document.getElementById('nombrePedido').value,
                 descripcion: document.getElementById('descPedido').value
             };
-
             fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
                 .then(res => res.json())
                 .then(data => {
                     if(data.status === "success") {
                         document.getElementById('msg-pedido-exito').style.display = "block";
-                        cancelarEdicion(); 
-                        cargarPedidos(); 
+                        cancelarEdicion(); cargarPedidos(); 
                         setTimeout(() => document.getElementById('msg-pedido-exito').style.display = "none", 3000);
                     } else { throw new Error(); }
                 })
@@ -425,6 +452,113 @@
                     if(data.status === "success") {
                         cargarPedidos();
                         if(document.getElementById('idEdicion').value === id) cancelarEdicion();
+                    }
+                });
+            }
+        }
+
+        // --- LÓGICA DE INVENTARIO ---
+        function cargarInventario() {
+            const contenedor = document.getElementById('lista-inventario');
+            contenedor.innerHTML = "<p class='cargando'>Cargando inventario...</p>";
+            const urlAntiCache = URL_GOOGLE + "?action=getInventory&nocache=" + new Date().getTime();
+
+            fetch(urlAntiCache, { cache: "no-store" })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success" && data.items.length > 0) {
+                        inventarioGlobal = data.items;
+                        contenedor.innerHTML = "";
+                        
+                        data.items.forEach(item => {
+                            const cant = parseFloat(item.cantidad) || 0;
+                            const min = parseFloat(item.stockMinimo) || 0;
+                            const esBajo = cant <= min;
+                            
+                            const div = document.createElement('div');
+                            div.className = `item-card ${esBajo ? 'alerta-stock' : ''}`;
+                            div.innerHTML = `
+                                <div class="item-info">
+                                    <h4>${item.nombre}</h4>
+                                    <span class="dato ${esBajo ? 'rojo' : ''}">
+                                        Stock: ${cant} ${item.unidad} ${esBajo ? '⚠️ (¡Comprar más!)' : ''}
+                                    </span>
+                                    <p style="margin-top: 5px;">Mínimo requerido: ${min} ${item.unidad}</p>
+                                </div>
+                                <div class="acciones">
+                                    <button class="btn-accion btn-editar" onclick="prepararEdicionInv('${item.id}')">✏️</button>
+                                    <button class="btn-accion btn-borrar" onclick="borrarItem('${item.id}')">🗑️</button>
+                                </div>`;
+                            contenedor.appendChild(div);
+                        });
+                    } else { contenedor.innerHTML = "<p class='cargando'>No hay materiales registrados.</p>"; }
+                })
+                .catch(err => { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar inventario.</p>"; });
+        }
+
+        function prepararEdicionInv(id) {
+            const item = inventarioGlobal.find(i => i.id.toString() === id.toString());
+            if(!item) return;
+            document.getElementById('idInvEdicion').value = item.id;
+            document.getElementById('invNombre').value = item.nombre;
+            document.getElementById('invCantidad').value = item.cantidad;
+            document.getElementById('invUnidad').value = item.unidad;
+            document.getElementById('invStockMin').value = item.stockMinimo;
+            
+            document.getElementById('titulo-form-inv').textContent = "Modificar Material";
+            document.getElementById('btn-guardar-inv').textContent = "💾 Actualizar Material 💾";
+            document.getElementById('btn-cancelar-inv').style.display = "block";
+            document.getElementById('formulario-inventario').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicionInv() {
+            document.getElementById('idInvEdicion').value = "";
+            document.getElementById('formulario-inventario').reset();
+            document.getElementById('titulo-form-inv').textContent = "Agregar Material";
+            document.getElementById('btn-guardar-inv').textContent = "📦 Guardar Material 📦";
+            document.getElementById('btn-cancelar-inv').style.display = "none";
+        }
+
+        document.getElementById('formulario-inventario').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-guardar-inv');
+            btn.textContent = "Guardando..."; btn.disabled = true;
+            const idEdicion = document.getElementById('idInvEdicion').value;
+            const esEdicion = idEdicion !== "";
+
+            const datos = {
+                action: esEdicion ? "updateItem" : "saveItem",
+                id: esEdicion ? idEdicion : null,
+                nombre: document.getElementById('invNombre').value,
+                cantidad: document.getElementById('invCantidad').value,
+                unidad: document.getElementById('invUnidad').value,
+                stockMinimo: document.getElementById('invStockMin').value
+            };
+
+            fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        document.getElementById('msg-inv-exito').style.display = "block";
+                        cancelarEdicionInv(); cargarInventario(); 
+                        setTimeout(() => document.getElementById('msg-inv-exito').style.display = "none", 3000);
+                    } else { throw new Error(); }
+                })
+                .catch(err => {
+                    document.getElementById('msg-inv-error').style.display = "block";
+                    setTimeout(() => document.getElementById('msg-inv-error').style.display = "none", 3000);
+                })
+                .finally(() => { btn.disabled = false; });
+        });
+
+        function borrarItem(id) {
+            if(confirm("¿Segura de eliminar este material del inventario?")) {
+                fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify({ action: "deleteItem", id: id }) })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        cargarInventario();
+                        if(document.getElementById('idInvEdicion').value === id) cancelarEdicionInv();
                     }
                 });
             }
