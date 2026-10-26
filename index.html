@@ -127,7 +127,6 @@
         <button class="tab-btn" onclick="cambiarSeccion('pedidos', this)">👗 Pedidos</button>
     </div>
 
-    <!-- SECCIÓN 1: GANANCIAS -->
     <div id="seccion-ganancias" class="seccion active">
         <div class="tarjeta-total">
             <h3>GANANCIA POR MANO DE OBRA ESTE MES</h3>
@@ -163,7 +162,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 2: PEDIDOS -->
     <div id="seccion-pedidos" class="seccion">
         <div class="card">
             <h2 id="titulo-form-pedido">Agregar Nuevo Pedido</h2>
@@ -182,7 +180,6 @@
                     <label>Nombre de la Clienta</label>
                     <input type="text" id="nombrePedido" placeholder="Ej: Ana Gómez" required>
                 </div>
-                <!-- EL TELÉFONO HA SIDO ELIMINADO -->
                 <div class="form-group">
                     <label>Descripción del Pedido</label>
                     <textarea id="descPedido" rows="2" placeholder="Ej: Blusa manga corta, talla S" required></textarea>
@@ -234,9 +231,7 @@
         }
 
         function actualizarTotalMes() {
-            // AGREGAMOS UN ROMPE-CACHÉ PARA QUE GOOGLE NO NOS DÉ DATOS VIEJOS
             const urlAntiCache = URL_GOOGLE + "?action=getEarnings&nocache=" + new Date().getTime();
-            
             fetch(urlAntiCache, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
@@ -283,6 +278,18 @@
                 .finally(() => { btn.textContent = "✨ Guardar Ganancia ✨"; btn.disabled = false; });
         });
 
+        // --- FUNCIÓN PARA ARREGLAR LAS FECHAS ---
+        // Google Sheets a veces manda fechas raras, esto las limpia para que el input las acepte
+        function fechaParaInput(fechaRaw) {
+            if (!fechaRaw) return "";
+            const d = new Date(fechaRaw);
+            if (isNaN(d.getTime())) return "";
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // --- LÓGICA DE PEDIDOS ---
         document.getElementById('fechaPedido').valueAsDate = new Date();
 
@@ -290,7 +297,6 @@
             const contenedor = document.getElementById('lista-pedidos');
             contenedor.innerHTML = "<p class='cargando'>Cargando pedidos...</p>";
 
-            // ROMPE-CACHÉ PARA PEDIDOS
             const urlAntiCache = URL_GOOGLE + "?action=getOrders&nocache=" + new Date().getTime();
 
             fetch(urlAntiCache, { cache: "no-store" })
@@ -305,7 +311,10 @@
                         hoy.setHours(0,0,0,0);
 
                         data.orders.forEach(pedido => {
-                            const fechaEntregaObj = new Date(pedido.fechaEntrega + 'T00:00:00');
+                            // Limpiamos la fecha para que no falle
+                            const fechaLimpia = fechaParaInput(pedido.fechaEntrega);
+                            const fechaEntregaObj = new Date(fechaLimpia + 'T00:00:00');
+                            
                             const diffTiempo = fechaEntregaObj - hoy;
                             const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
                             
@@ -326,7 +335,6 @@
 
                             const div = document.createElement('div');
                             div.className = `pedido-item ${claseUrgente}`;
-                            // QUITAMOS EL TELÉFONO DE LA VISTA
                             div.innerHTML = `
                                 <div class="pedido-info">
                                     <h4>${pedido.nombre}</h4>
@@ -348,12 +356,14 @@
         }
 
         function prepararEdicion(id) {
-            const pedido = pedidosGlobal.find(p => p.id === id);
+            // Buscamos el pedido asegurándonos de que los IDs coincidan como texto
+            const pedido = pedidosGlobal.find(p => p.id.toString() === id.toString());
             if(!pedido) return;
 
             document.getElementById('idEdicion').value = pedido.id;
-            document.getElementById('fechaPedido').value = pedido.fechaPedido.split('T')[0];
-            document.getElementById('fechaEntrega').value = pedido.fechaEntrega.split('T')[0];
+            // Usamos la función para limpiar las fechas
+            document.getElementById('fechaPedido').value = fechaParaInput(pedido.fechaPedido);
+            document.getElementById('fechaEntrega').value = fechaParaInput(pedido.fechaEntrega);
             document.getElementById('nombrePedido').value = pedido.nombre;
             document.getElementById('descPedido').value = pedido.descripcion;
 
