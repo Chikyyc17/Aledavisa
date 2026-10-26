@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aledavisa C.A. - App</title>
+    
+    <!-- 👇 ESTA ES LA LÍNEA MÁGICA PARA EL LOGUITO EN LA PESTAÑA 👇 -->
+    <link rel="icon" type="image/png" href="logo.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -278,8 +282,6 @@
                 .finally(() => { btn.textContent = "✨ Guardar Ganancia ✨"; btn.disabled = false; });
         });
 
-        // --- FUNCIÓN PARA ARREGLAR LAS FECHAS ---
-        // Google Sheets a veces manda fechas raras, esto las limpia para que el input las acepte
         function fechaParaInput(fechaRaw) {
             if (!fechaRaw) return "";
             const d = new Date(fechaRaw);
@@ -311,7 +313,6 @@
                         hoy.setHours(0,0,0,0);
 
                         data.orders.forEach(pedido => {
-                            // Limpiamos la fecha para que no falle
                             const fechaLimpia = fechaParaInput(pedido.fechaEntrega);
                             const fechaEntregaObj = new Date(fechaLimpia + 'T00:00:00');
                             
@@ -356,12 +357,10 @@
         }
 
         function prepararEdicion(id) {
-            // Buscamos el pedido asegurándonos de que los IDs coincidan como texto
             const pedido = pedidosGlobal.find(p => p.id.toString() === id.toString());
             if(!pedido) return;
 
             document.getElementById('idEdicion').value = pedido.id;
-            // Usamos la función para limpiar las fechas
             document.getElementById('fechaPedido').value = fechaParaInput(pedido.fechaPedido);
             document.getElementById('fechaEntrega').value = fechaParaInput(pedido.fechaEntrega);
             document.getElementById('nombrePedido').value = pedido.nombre;
