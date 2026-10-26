@@ -19,10 +19,7 @@
             background-color: var(--fondo);
             background-image: radial-gradient(circle at top right, rgba(107, 209, 227, 0.2), transparent 40%),
                               radial-gradient(circle at bottom left, rgba(255, 43, 182, 0.1), transparent 40%);
-            margin: 0;
-            padding: 20px;
-            color: var(--texto);
-            min-height: 100vh;
+            margin: 0; padding: 20px; color: var(--texto); min-height: 100vh;
         }
         
         .header { text-align: center; margin-bottom: 20px; }
@@ -83,7 +80,6 @@
             margin-top: 10px; display: none; font-family: 'Poppins', sans-serif;
         }
 
-        /* TARJETAS DE PEDIDOS */
         .pedido-item {
             background: var(--blanco); max-width: 500px; margin: 0 auto 15px;
             padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
@@ -94,7 +90,6 @@
         .pedido-info p { margin: 0; font-size: 0.85rem; color: #666; }
         .pedido-info .fecha { font-weight: 600; color: var(--azul-rey); margin-top: 5px; display: block; }
         
-        /* BOTONES DE ACCIÓN (EDITAR Y BORRAR) */
         .acciones { display: flex; gap: 10px; }
         .btn-accion {
             border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: background 0.3s;
@@ -110,6 +105,8 @@
         }
         .exito { background: #e8f8f5; color: #1abc9c; }
         .error { background: #fdedec; color: #e74c3c; }
+        
+        .cargando { text-align: center; color: #888; font-style: italic; margin-top: 20px; }
         
         @media (max-width: 600px) {
             .monto { font-size: 2.8rem; }
@@ -171,7 +168,6 @@
         <div class="card">
             <h2 id="titulo-form-pedido">Agregar Nuevo Pedido</h2>
             <form id="formulario-pedidos">
-                <!-- Campo oculto para saber si estamos editando -->
                 <input type="hidden" id="idEdicion">
                 
                 <div class="form-group">
@@ -186,13 +182,10 @@
                     <label>Nombre de la Clienta</label>
                     <input type="text" id="nombrePedido" placeholder="Ej: Ana Gómez" required>
                 </div>
-                <div class="form-group">
-                    <label>Teléfono</label>
-                    <input type="tel" id="telefono" placeholder="Ej: 04141234567" required>
-                </div>
+                <!-- EL TELÉFONO HA SIDO ELIMINADO -->
                 <div class="form-group">
                     <label>Descripción del Pedido</label>
-                    <textarea id="descPedido" rows="2" placeholder="Ej: Blusa manga corta, talla S, color azul" required></textarea>
+                    <textarea id="descPedido" rows="2" placeholder="Ej: Blusa manga corta, talla S" required></textarea>
                 </div>
                 
                 <button type="submit" class="btn-principal" id="btn-guardar-pedido">📝 Guardar Pedido 📝</button>
@@ -203,14 +196,14 @@
             </form>
         </div>
 
-        <h3 style="text-align: center; color: #666; margin-top: 30px;">Pedidos por Entregar (Más próximos primero)</h3>
+        <h3 style="text-align: center; color: #666; margin-top: 30px;">Pedidos por Entregar</h3>
         <div id="lista-pedidos"></div>
     </div>
 
     <script>
         const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
         
-        let pedidosGlobal = []; // Guardamos los pedidos aquí para poder editarlos fácil
+        let pedidosGlobal = []; 
 
         function cambiarSeccion(idSeccion, btn) {
             document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
@@ -241,7 +234,10 @@
         }
 
         function actualizarTotalMes() {
-            fetch(URL_GOOGLE + "?action=getEarnings")
+            // AGREGAMOS UN ROMPE-CACHÉ PARA QUE GOOGLE NO NOS DÉ DATOS VIEJOS
+            const urlAntiCache = URL_GOOGLE + "?action=getEarnings&nocache=" + new Date().getTime();
+            
+            fetch(urlAntiCache, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
                     if(data.status === "success") {
@@ -292,13 +288,16 @@
 
         function cargarPedidos() {
             const contenedor = document.getElementById('lista-pedidos');
-            contenedor.innerHTML = "<p style='text-align:center; color:#888;'>Cargando pedidos...</p>";
+            contenedor.innerHTML = "<p class='cargando'>Cargando pedidos...</p>";
 
-            fetch(URL_GOOGLE + "?action=getOrders")
+            // ROMPE-CACHÉ PARA PEDIDOS
+            const urlAntiCache = URL_GOOGLE + "?action=getOrders&nocache=" + new Date().getTime();
+
+            fetch(urlAntiCache, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
                     if(data.status === "success" && data.orders.length > 0) {
-                        pedidosGlobal = data.orders; // Guardamos para editar
+                        pedidosGlobal = data.orders; 
                         data.orders.sort((a, b) => new Date(a.fechaEntrega) - new Date(b.fechaEntrega));
                         
                         contenedor.innerHTML = "";
@@ -327,9 +326,10 @@
 
                             const div = document.createElement('div');
                             div.className = `pedido-item ${claseUrgente}`;
+                            // QUITAMOS EL TELÉFONO DE LA VISTA
                             div.innerHTML = `
                                 <div class="pedido-info">
-                                    <h4>${pedido.nombre} - ${pedido.telefono}</h4>
+                                    <h4>${pedido.nombre}</h4>
                                     <p>${pedido.descripcion}</p>
                                     <span class="fecha">Entrega: ${fechaFormat} <small>${textoDias}</small></span>
                                 </div>
@@ -341,31 +341,26 @@
                             contenedor.appendChild(div);
                         });
                     } else {
-                        contenedor.innerHTML = "<p style='text-align:center; color:#888;'>No hay pedidos pendientes. ¡A descansar! ☕</p>";
+                        contenedor.innerHTML = "<p class='cargando'>No hay pedidos pendientes. ¡A descansar! ☕</p>";
                     }
                 })
                 .catch(err => { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar pedidos.</p>"; });
         }
 
-        // --- FUNCIÓN PARA EDITAR ---
         function prepararEdicion(id) {
             const pedido = pedidosGlobal.find(p => p.id === id);
             if(!pedido) return;
 
-            // Rellenar el formulario
             document.getElementById('idEdicion').value = pedido.id;
-            document.getElementById('fechaPedido').value = pedido.fechaPedido.split('T')[0]; // Formatear fecha
+            document.getElementById('fechaPedido').value = pedido.fechaPedido.split('T')[0];
             document.getElementById('fechaEntrega').value = pedido.fechaEntrega.split('T')[0];
             document.getElementById('nombrePedido').value = pedido.nombre;
-            document.getElementById('telefono').value = pedido.telefono;
             document.getElementById('descPedido').value = pedido.descripcion;
 
-            // Cambiar textos de los botones
             document.getElementById('titulo-form-pedido').textContent = "Modificar Pedido";
             document.getElementById('btn-guardar-pedido').textContent = "💾 Actualizar Pedido 💾";
             document.getElementById('btn-cancelar-edicion').style.display = "block";
 
-            // Subir al formulario suavemente
             document.getElementById('formulario-pedidos').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -379,7 +374,6 @@
             document.getElementById('btn-cancelar-edicion').style.display = "none";
         }
 
-        // --- ENVÍO DEL FORMULARIO (GUARDAR O ACTUALIZAR) ---
         document.getElementById('formulario-pedidos').addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-guardar-pedido');
@@ -394,7 +388,6 @@
                 fechaPedido: document.getElementById('fechaPedido').value,
                 fechaEntrega: document.getElementById('fechaEntrega').value,
                 nombre: document.getElementById('nombrePedido').value,
-                telefono: document.getElementById('telefono').value,
                 descripcion: document.getElementById('descPedido').value
             };
 
@@ -403,8 +396,8 @@
                 .then(data => {
                     if(data.status === "success") {
                         document.getElementById('msg-pedido-exito').style.display = "block";
-                        cancelarEdicion(); // Limpia el formulario
-                        cargarPedidos(); // Recarga la lista
+                        cancelarEdicion(); 
+                        cargarPedidos(); 
                         setTimeout(() => document.getElementById('msg-pedido-exito').style.display = "none", 3000);
                     } else { throw new Error(); }
                 })
@@ -422,7 +415,6 @@
                 .then(data => {
                     if(data.status === "success") {
                         cargarPedidos();
-                        // Si estábamos editando este mismo, cancelamos la edición
                         if(document.getElementById('idEdicion').value === id) cancelarEdicion();
                     }
                 });
