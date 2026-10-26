@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aledavisa C.A. - Panel de Ventas</title>
+    <title>Aledavisa C.A. - App</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -25,259 +25,411 @@
             min-height: 100vh;
         }
         
-        /* --- ENCABEZADO Y LOGO --- */
-        .header { text-align: center; margin-bottom: 25px; }
-        .logo {
-            max-width: 300px;
-            width: 100%;
-            height: auto;
-            margin-bottom: 15px;
-            display: inline-block;
-            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.05));
-        }
-        .header p { 
-            margin: 5px 0 0; color: #777; font-size: 0.9rem; 
-            text-transform: uppercase; letter-spacing: 2px;
-        }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo { max-width: 250px; width: 100%; height: auto; margin-bottom: 10px; }
         
-        /* --- TARJETA DEL TOTAL DEL MES (CON PRIVACIDAD) --- */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tab-btn {
+            padding: 12px 25px; border: none; border-radius: 30px;
+            font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600;
+            cursor: pointer; background: var(--blanco); color: #777;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(90deg, var(--azul-rey), var(--rosa));
+            color: white; box-shadow: 0 5px 15px rgba(255, 43, 182, 0.3);
+        }
+
+        .seccion { display: none; animation: fadeIn 0.4s; }
+        .seccion.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .tarjeta-total {
             background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
-            backdrop-filter: blur(10px);
-            max-width: 500px;
-            margin: 0 auto 25px;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,26,255,0.08);
-            border: 1px solid rgba(255,255,255,0.5);
-            text-align: center;
-            border-bottom: 4px solid var(--rosa);
+            backdrop-filter: blur(10px); max-width: 500px; margin: 0 auto 25px;
+            padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,26,255,0.08);
+            text-align: center; border-bottom: 4px solid var(--rosa);
         }
-        .tarjeta-total h3 {
-            margin: 0 0 10px; font-size: 1rem; color: #666; 
-            font-weight: 600; letter-spacing: 1px;
-        }
-        
-        /* Contenedor del monto y el ojito */
-        .monto-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px; /* Separación entre el número y el ojito */
-        }
-        .tarjeta-total .monto {
-            font-family: 'Playfair Display', serif;
-            font-size: 3.5rem;
-            font-weight: 600;
-            color: var(--azul-rey);
-            margin: 0;
-            line-height: 1;
-            transition: all 0.3s;
-        }
-        .btn-ojo {
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            padding: 5px;
-            opacity: 0.6;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        .btn-ojo:hover { opacity: 1; transform: scale(1.1); }
+        .tarjeta-total h3 { margin: 0 0 10px; font-size: 1rem; color: #666; letter-spacing: 1px; }
+        .monto-container { display: flex; justify-content: center; align-items: center; gap: 15px; }
+        .monto { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 600; color: var(--azul-rey); margin: 0; line-height: 1; }
+        .btn-ojo { background: none; border: none; font-size: 1.8rem; cursor: pointer; opacity: 0.6; }
 
-        /* --- FORMULARIO --- */
-        .form-container {
-            background: var(--blanco);
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+        .card {
+            background: var(--blanco); max-width: 500px; margin: 0 auto 20px;
+            padding: 25px; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.05);
         }
-        .form-container h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; font-size: 1.5rem; color: var(--texto); }
+        .card h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; font-size: 1.4rem; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; color: #555;}
-        
-        /* SOLUCIÓN AL ZOOM: font-size de 16px */
-        .form-group input {
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; color: #555; }
+        .form-group input, .form-group textarea {
             width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px;
-            font-family: 'Poppins', sans-serif; box-sizing: border-box;
-            transition: border-color 0.3s;
-            background-color: #fafafa;
-            font-size: 16px; /* ESTO EVITA EL ZOOM EN CELULARES */
+            font-family: 'Poppins', sans-serif; box-sizing: border-box; font-size: 16px;
+            background-color: #fafafa; transition: border-color 0.3s;
         }
-        .form-group input:focus { border-color: var(--celeste); outline: none; background-color: var(--blanco); }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--celeste); outline: none; background: #fff; }
         
-        .btn-guardar {
-            width: 100%; padding: 15px;
-            background: linear-gradient(90deg, var(--azul-rey), var(--rosa));
-            color: white; border: none; border-radius: 10px;
-            font-size: 1.1rem; font-weight: 600; cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-family: 'Poppins', sans-serif; margin-top: 10px;
-            box-shadow: 0 5px 15px rgba(255, 43, 182, 0.3);
+        .btn-principal {
+            width: 100%; padding: 15px; background: linear-gradient(90deg, var(--azul-rey), var(--rosa));
+            color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(255, 43, 182, 0.3); transition: transform 0.2s;
         }
-        .btn-guardar:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 43, 182, 0.4); }
-        .btn-guardar:disabled { background: #ccc; box-shadow: none; transform: none; cursor: not-allowed; }
+        .btn-principal:hover { transform: translateY(-2px); }
+        .btn-principal:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
         
-        #mensaje-exito, #mensaje-error {
-            display: none; text-align: center; margin-top: 15px;
-            font-weight: 600; padding: 12px; border-radius: 10px; font-size: 0.9rem;
+        .btn-cancelar {
+            width: 100%; padding: 12px; background: #eee; color: #555; border: none;
+            border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            margin-top: 10px; display: none; font-family: 'Poppins', sans-serif;
         }
-        #mensaje-exito { background: #e8f8f5; color: #1abc9c; }
-        #mensaje-error { background: #fdedec; color: #e74c3c; }
+
+        /* TARJETAS DE PEDIDOS */
+        .pedido-item {
+            background: var(--blanco); max-width: 500px; margin: 0 auto 15px;
+            padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--celeste); display: flex; justify-content: space-between; align-items: center;
+        }
+        .pedido-item.urgente { border-left-color: var(--rosa); }
+        .pedido-info h4 { margin: 0 0 5px; font-size: 1.1rem; color: var(--texto); }
+        .pedido-info p { margin: 0; font-size: 0.85rem; color: #666; }
+        .pedido-info .fecha { font-weight: 600; color: var(--azul-rey); margin-top: 5px; display: block; }
+        
+        /* BOTONES DE ACCIÓN (EDITAR Y BORRAR) */
+        .acciones { display: flex; gap: 10px; }
+        .btn-accion {
+            border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: background 0.3s;
+        }
+        .btn-editar { background: #e8f8f5; color: #1abc9c; }
+        .btn-editar:hover { background: #1abc9c; color: white; }
+        .btn-borrar { background: #fdedec; color: #e74c3c; }
+        .btn-borrar:hover { background: #e74c3c; color: white; }
+
+        #mensaje-exito, #mensaje-error, #msg-pedido-exito, #msg-pedido-error {
+            display: none; text-align: center; margin-top: 15px; font-weight: 600;
+            padding: 12px; border-radius: 10px; font-size: 0.9rem;
+        }
+        .exito { background: #e8f8f5; color: #1abc9c; }
+        .error { background: #fdedec; color: #e74c3c; }
         
         @media (max-width: 600px) {
-            .logo { max-width: 220px; }
-            .tarjeta-total .monto { font-size: 2.8rem; }
+            .monto { font-size: 2.8rem; }
+            .pedido-item { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .acciones { width: 100%; justify-content: flex-end; }
+            .btn-accion { flex: 1; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <img src="logo.png" alt="Logo Aledavisa C.A." class="logo">
-        <p>Registro de Ganancias (Mano de Obra)</p>
+        <img src="logo.png" alt="Logo Aledavisa" class="logo">
     </div>
 
-    <!-- TARJETA DINÁMICA CON BOTÓN DE OJITO -->
-    <div class="tarjeta-total">
-        <h3>GANANCIA POR MANO DE OBRA ESTE MES</h3>
-        <div class="monto-container">
-            <p class="monto" id="total-mes">••••••</p>
-            <button id="btn-ojo" class="btn-ojo" aria-label="Mostrar/Ocultar total">👁️</button>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="cambiarSeccion('ganancias', this)">💰 Ganancias</button>
+        <button class="tab-btn" onclick="cambiarSeccion('pedidos', this)">👗 Pedidos</button>
+    </div>
+
+    <!-- SECCIÓN 1: GANANCIAS -->
+    <div id="seccion-ganancias" class="seccion active">
+        <div class="tarjeta-total">
+            <h3>GANANCIA POR MANO DE OBRA ESTE MES</h3>
+            <div class="monto-container">
+                <p class="monto" id="total-mes">••••••</p>
+                <button id="btn-ojo" class="btn-ojo">👁️</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Registrar Ganancia</h2>
+            <form id="formulario-ventas">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre de la Clienta</label>
+                    <input type="text" id="nombre" placeholder="Ej: María Pérez" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <input type="text" id="descripcion" placeholder="Ej: Vestido de flores" required>
+                </div>
+                <div class="form-group">
+                    <label>Mano de Obra ($)</label>
+                    <input type="number" id="manoObra" placeholder="Ej: 15.00" step="0.01" min="0" required>
+                </div>
+                <button type="submit" class="btn-principal" id="btn-guardar">✨ Guardar Ganancia ✨</button>
+                <div id="mensaje-exito" class="exito">¡Guardado con éxito! 🎉</div>
+                <div id="mensaje-error" class="error">Ups, hubo un error.</div>
+            </form>
         </div>
     </div>
 
-    <div class="form-container">
-        <h2>Agregar Nuevo Registro</h2>
-        <form id="formulario-ventas">
-            <div class="form-group">
-                <label>Fecha</label>
-                <input type="date" id="fecha" required>
-            </div>
-            <div class="form-group">
-                <label>Nombre de la Clienta</label>
-                <input type="text" id="nombre" placeholder="Ej: María Pérez" required>
-            </div>
-            <div class="form-group">
-                <label>Descripción (Prenda / Trabajo)</label>
-                <input type="text" id="descripcion" placeholder="Ej: Vestido de flores" required>
-            </div>
-            <div class="form-group">
-                <label>Mano de Obra ($) - Ganancia</label>
-                <input type="number" id="manoObra" placeholder="Ej: 15.00" step="0.01" min="0" required>
-            </div>
-            
-            <button type="submit" class="btn-guardar" id="btn-guardar">✨ Guardar en Excel ✨</button>
-            <div id="mensaje-exito">¡Guardado con éxito! 🎉</div>
-            <div id="mensaje-error">Ups, hubo un error. Revisa la conexión.</div>
-        </form>
+    <!-- SECCIÓN 2: PEDIDOS -->
+    <div id="seccion-pedidos" class="seccion">
+        <div class="card">
+            <h2 id="titulo-form-pedido">Agregar Nuevo Pedido</h2>
+            <form id="formulario-pedidos">
+                <!-- Campo oculto para saber si estamos editando -->
+                <input type="hidden" id="idEdicion">
+                
+                <div class="form-group">
+                    <label>Fecha del Pedido</label>
+                    <input type="date" id="fechaPedido" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Entrega (¡Importante!)</label>
+                    <input type="date" id="fechaEntrega" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre de la Clienta</label>
+                    <input type="text" id="nombrePedido" placeholder="Ej: Ana Gómez" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="telefono" placeholder="Ej: 04141234567" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción del Pedido</label>
+                    <textarea id="descPedido" rows="2" placeholder="Ej: Blusa manga corta, talla S, color azul" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-principal" id="btn-guardar-pedido">📝 Guardar Pedido 📝</button>
+                <button type="button" class="btn-cancelar" id="btn-cancelar-edicion" onclick="cancelarEdicion()">Cancelar Edición</button>
+                
+                <div id="msg-pedido-exito" class="exito">¡Pedido guardado! 🎉</div>
+                <div id="msg-pedido-error" class="error">Ups, hubo un error.</div>
+            </form>
+        </div>
+
+        <h3 style="text-align: center; color: #666; margin-top: 30px;">Pedidos por Entregar (Más próximos primero)</h3>
+        <div id="lista-pedidos"></div>
     </div>
 
     <script>
         const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
+        
+        let pedidosGlobal = []; // Guardamos los pedidos aquí para poder editarlos fácil
 
-        // Variables para controlar la privacidad
+        function cambiarSeccion(idSeccion, btn) {
+            document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('seccion-' + idSeccion).classList.add('active');
+            btn.classList.add('active');
+
+            if(idSeccion === 'pedidos') {
+                cargarPedidos();
+            } else {
+                actualizarTotalMes();
+            }
+        }
+
+        // --- LÓGICA DE GANANCIAS ---
         let mostrarTotal = false;
         let valorTotalMes = 0;
-
         document.getElementById('fecha').valueAsDate = new Date();
 
-        // Función para formatear y mostrar/ocultar el dinero
         function renderizarTotal() {
             const displayTotal = document.getElementById('total-mes');
             if (mostrarTotal) {
-                const formatoMoneda = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                });
-                displayTotal.textContent = formatoMoneda.format(valorTotalMes);
+                const formato = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                displayTotal.textContent = formato.format(valorTotalMes);
             } else {
                 displayTotal.textContent = "••••••";
             }
         }
 
-        // Función que consulta a Google Sheets
         function actualizarTotalMes() {
-            fetch(URL_GOOGLE)
-                .then(response => response.json())
+            fetch(URL_GOOGLE + "?action=getEarnings")
+                .then(res => res.json())
                 .then(data => {
                     if(data.status === "success") {
-                        valorTotalMes = data.totalMes; // Guardamos el valor real
-                        renderizarTotal(); // Lo dibujamos dependiendo de si está oculto o no
-                    } else {
-                        valorTotalMes = 0;
+                        valorTotalMes = data.totalMes;
                         renderizarTotal();
-                    }
+                    } else { valorTotalMes = 0; renderizarTotal(); }
                 })
-                .catch(error => {
-                    console.error('Error al cargar total:', error);
-                    document.getElementById('total-mes').textContent = "Error";
-                });
+                .catch(err => { document.getElementById('total-mes').textContent = "Error"; });
         }
 
-        // Evento del botón del ojito
         document.getElementById('btn-ojo').addEventListener('click', function() {
-            mostrarTotal = !mostrarTotal; // Cambia entre true y false
-            if(mostrarTotal) {
-                this.textContent = "🙈"; // Cambia el icono
-            } else {
-                this.textContent = "👁️"; 
-            }
+            mostrarTotal = !mostrarTotal;
+            this.textContent = mostrarTotal ? "🙈" : "👁️";
             renderizarTotal();
         });
 
-        actualizarTotalMes();
-
-        // Evento para guardar la venta
         document.getElementById('formulario-ventas').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const btn = document.getElementById('btn-guardar');
-            const msgExito = document.getElementById('mensaje-exito');
-            const msgError = document.getElementById('mensaje-error');
-            
-            btn.textContent = "Guardando...";
-            btn.disabled = true;
-            msgExito.style.display = "none";
-            msgError.style.display = "none";
-
-            const fecha = document.getElementById('fecha').value;
-            const nombre = document.getElementById('nombre').value;
-            const descripcion = document.getElementById('descripcion').value;
-            const manoObra = document.getElementById('manoObra').value;
-
-            const datos = { fecha, nombre, descripcion, manoObra };
-
-            fetch(URL_GOOGLE, {
-                method: 'POST',
-                body: JSON.stringify(datos)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === "success") {
-                    msgExito.style.display = "block";
-                    document.getElementById('formulario-ventas').reset();
-                    document.getElementById('fecha').valueAsDate = new Date(); 
-                    
-                    actualizarTotalMes(); 
-
-                    btn.textContent = "✨ Guardar en Excel ✨";
-                    btn.disabled = false;
-                    
-                    setTimeout(() => { msgExito.style.display = "none"; }, 3000);
-                } else {
-                    throw new Error("Error en Google Sheets");
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                msgError.style.display = "block";
-                btn.textContent = "✨ Guardar en Excel ✨";
-                btn.disabled = false;
-            });
+            btn.textContent = "Guardando..."; btn.disabled = true;
+            const datos = {
+                action: "saveEarning",
+                fecha: document.getElementById('fecha').value,
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                manoObra: document.getElementById('manoObra').value
+            };
+            fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        document.getElementById('mensaje-exito').style.display = "block";
+                        document.getElementById('formulario-ventas').reset();
+                        document.getElementById('fecha').valueAsDate = new Date();
+                        actualizarTotalMes();
+                        setTimeout(() => document.getElementById('mensaje-exito').style.display = "none", 3000);
+                    } else { throw new Error(); }
+                })
+                .catch(err => {
+                    document.getElementById('mensaje-error').style.display = "block";
+                    setTimeout(() => document.getElementById('mensaje-error').style.display = "none", 3000);
+                })
+                .finally(() => { btn.textContent = "✨ Guardar Ganancia ✨"; btn.disabled = false; });
         });
+
+        // --- LÓGICA DE PEDIDOS ---
+        document.getElementById('fechaPedido').valueAsDate = new Date();
+
+        function cargarPedidos() {
+            const contenedor = document.getElementById('lista-pedidos');
+            contenedor.innerHTML = "<p style='text-align:center; color:#888;'>Cargando pedidos...</p>";
+
+            fetch(URL_GOOGLE + "?action=getOrders")
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success" && data.orders.length > 0) {
+                        pedidosGlobal = data.orders; // Guardamos para editar
+                        data.orders.sort((a, b) => new Date(a.fechaEntrega) - new Date(b.fechaEntrega));
+                        
+                        contenedor.innerHTML = "";
+                        const hoy = new Date();
+                        hoy.setHours(0,0,0,0);
+
+                        data.orders.forEach(pedido => {
+                            const fechaEntregaObj = new Date(pedido.fechaEntrega + 'T00:00:00');
+                            const diffTiempo = fechaEntregaObj - hoy;
+                            const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
+                            
+                            let claseUrgente = "";
+                            let textoDias = "";
+                            
+                            if(diffDias <= 2 && diffDias >= 0) {
+                                claseUrgente = "urgente";
+                                textoDias = diffDias === 0 ? "(¡HOY!)" : `(En ${diffDias} días)`;
+                            } else if (diffDias < 0) {
+                                claseUrgente = "urgente";
+                                textoDias = "(¡ATRASADO!)";
+                            } else {
+                                textoDias = `(En ${diffDias} días)`;
+                            }
+
+                            const fechaFormat = fechaEntregaObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+
+                            const div = document.createElement('div');
+                            div.className = `pedido-item ${claseUrgente}`;
+                            div.innerHTML = `
+                                <div class="pedido-info">
+                                    <h4>${pedido.nombre} - ${pedido.telefono}</h4>
+                                    <p>${pedido.descripcion}</p>
+                                    <span class="fecha">Entrega: ${fechaFormat} <small>${textoDias}</small></span>
+                                </div>
+                                <div class="acciones">
+                                    <button class="btn-accion btn-editar" onclick="prepararEdicion('${pedido.id}')">✏️</button>
+                                    <button class="btn-accion btn-borrar" onclick="borrarPedido('${pedido.id}')">🗑️</button>
+                                </div>
+                            `;
+                            contenedor.appendChild(div);
+                        });
+                    } else {
+                        contenedor.innerHTML = "<p style='text-align:center; color:#888;'>No hay pedidos pendientes. ¡A descansar! ☕</p>";
+                    }
+                })
+                .catch(err => { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar pedidos.</p>"; });
+        }
+
+        // --- FUNCIÓN PARA EDITAR ---
+        function prepararEdicion(id) {
+            const pedido = pedidosGlobal.find(p => p.id === id);
+            if(!pedido) return;
+
+            // Rellenar el formulario
+            document.getElementById('idEdicion').value = pedido.id;
+            document.getElementById('fechaPedido').value = pedido.fechaPedido.split('T')[0]; // Formatear fecha
+            document.getElementById('fechaEntrega').value = pedido.fechaEntrega.split('T')[0];
+            document.getElementById('nombrePedido').value = pedido.nombre;
+            document.getElementById('telefono').value = pedido.telefono;
+            document.getElementById('descPedido').value = pedido.descripcion;
+
+            // Cambiar textos de los botones
+            document.getElementById('titulo-form-pedido').textContent = "Modificar Pedido";
+            document.getElementById('btn-guardar-pedido').textContent = "💾 Actualizar Pedido 💾";
+            document.getElementById('btn-cancelar-edicion').style.display = "block";
+
+            // Subir al formulario suavemente
+            document.getElementById('formulario-pedidos').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('idEdicion').value = "";
+            document.getElementById('formulario-pedidos').reset();
+            document.getElementById('fechaPedido').valueAsDate = new Date();
+            
+            document.getElementById('titulo-form-pedido').textContent = "Agregar Nuevo Pedido";
+            document.getElementById('btn-guardar-pedido').textContent = "📝 Guardar Pedido 📝";
+            document.getElementById('btn-cancelar-edicion').style.display = "none";
+        }
+
+        // --- ENVÍO DEL FORMULARIO (GUARDAR O ACTUALIZAR) ---
+        document.getElementById('formulario-pedidos').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-guardar-pedido');
+            btn.textContent = "Guardando..."; btn.disabled = true;
+            
+            const idEdicion = document.getElementById('idEdicion').value;
+            const esEdicion = idEdicion !== "";
+
+            const datos = {
+                action: esEdicion ? "updateOrder" : "saveOrder",
+                id: esEdicion ? idEdicion : null,
+                fechaPedido: document.getElementById('fechaPedido').value,
+                fechaEntrega: document.getElementById('fechaEntrega').value,
+                nombre: document.getElementById('nombrePedido').value,
+                telefono: document.getElementById('telefono').value,
+                descripcion: document.getElementById('descPedido').value
+            };
+
+            fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        document.getElementById('msg-pedido-exito').style.display = "block";
+                        cancelarEdicion(); // Limpia el formulario
+                        cargarPedidos(); // Recarga la lista
+                        setTimeout(() => document.getElementById('msg-pedido-exito').style.display = "none", 3000);
+                    } else { throw new Error(); }
+                })
+                .catch(err => {
+                    document.getElementById('msg-pedido-error').style.display = "block";
+                    setTimeout(() => document.getElementById('msg-pedido-error').style.display = "none", 3000);
+                })
+                .finally(() => { btn.disabled = false; });
+        });
+
+        function borrarPedido(id) {
+            if(confirm("¿Estás segura de que quieres eliminar este pedido?")) {
+                fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify({ action: "deleteOrder", id: id }) })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        cargarPedidos();
+                        // Si estábamos editando este mismo, cancelamos la edición
+                        if(document.getElementById('idEdicion').value === id) cancelarEdicion();
+                    }
+                });
+            }
+        }
+
+        actualizarTotalMes();
     </script>
 </body>
 </html>
