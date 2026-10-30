@@ -1,20 +1,10 @@
 {
-  "name": "Aledavisa C.A.",
-  "short_name": "Aledavisa",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#001aff",
-  "icons": [
-    {
-      "src": "iconapp.jpg",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "iconapp.jpg",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+  "timeZone": "America/New_York",
+  "dependencies": {
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/script.external_request"
   ]
 }
