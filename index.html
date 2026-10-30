@@ -23,9 +23,24 @@
             margin: 0; padding: 20px; color: var(--texto); min-height: 100vh;
         }
         
-        .header { text-align: center; margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 20px; position: relative; }
         .logo { max-width: 250px; width: 100%; height: auto; margin-bottom: 10px; }
-        
+
+        /* BOTÓN FLOTANTE DE NOTIFICACIONES */
+        .btn-notif {
+            position: fixed; top: 20px; right: 20px;
+            background: var(--blanco); border: none; border-radius: 50%;
+            width: 55px; height: 55px; font-size: 1.6rem; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15); z-index: 100; transition: transform 0.2s;
+        }
+        .btn-notif:hover { transform: scale(1.1); }
+        .btn-notif.activo { background: linear-gradient(90deg, var(--azul-rey), var(--rosa)); color: white; }
+        .btn-notif.activo::after {
+            content: ''; position: absolute; top: 5px; right: 5px;
+            width: 12px; height: 12px; background: #2ecc71;
+            border-radius: 50%; border: 2px solid white;
+        }
+
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
         .tab-btn {
             padding: 12px 20px; border: none; border-radius: 30px;
@@ -60,7 +75,7 @@
         .card h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; font-size: 1.4rem; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; color: #555; }
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px;
             font-family: 'Poppins', sans-serif; box-sizing: border-box; font-size: 16px;
             background-color: #fafafa; transition: border-color 0.3s;
@@ -84,7 +99,6 @@
             margin-top: 10px; display: none; font-family: 'Poppins', sans-serif;
         }
 
-        /* TARJETAS GENERALES (PEDIDOS E INVENTARIO) */
         .item-card {
             background: var(--blanco); max-width: 500px; margin: 0 auto 15px;
             padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
@@ -123,6 +137,9 @@
     </style>
 </head>
 <body>
+
+    <!-- BOTÓN FLOTANTE DE NOTIFICACIONES -->
+    <button class="btn-notif" id="btn-notif" onclick="activarNotificaciones()" title="Activar notificaciones">🔔</button>
 
     <div class="header">
         <img src="logo.png" alt="Logo Aledavisa" class="logo">
@@ -219,7 +236,7 @@
                     </div>
                     <div class="form-group">
                         <label>Unidad</label>
-                        <select id="invUnidad" style="width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-family: 'Poppins'; font-size: 16px; background: #fafafa;">
+                        <select id="invUnidad">
                             <option value="Unidades">Unidades</option>
                             <option value="Metros">Metros</option>
                             <option value="Conos">Conos</option>
@@ -242,9 +259,32 @@
         <div id="lista-inventario"></div>
     </div>
 
+    <!-- SCRIPTS DE FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+
     <script>
         const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
         
+        // ==========================================
+        // CONFIGURACIÓN DE FIREBASE (TUS DATOS)
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQLtzJ8g1mGblFVzzV4NqlHMxOXsmP1x0",
+            authDomain: "aledavisa-1e0b4.firebaseapp.com",
+            projectId: "aledavisa-1e0b4",
+            storageBucket: "aledavisa-1e0b4.firebasestorage.app",
+            messagingSenderId: "124905728707",
+            appId: "1:124905728707:web:68fc6e7f993bedf7131076",
+            measurementId: "G-BMWKLZB9GD"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        // ⚠️ IMPORTANTE: PEGA AQUÍ TU VAPID KEY (La sacas de Firebase > Cloud Messaging)
+        const VAPID_KEY = "TU_VAPID_KEY_AQUI"; 
+
         // REGISTRAR SERVICE WORKER PARA LA PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -257,6 +297,56 @@
         let pedidosGlobal = []; 
         let inventarioGlobal = [];
 
+        // ==========================================
+        // SISTEMA DE NOTIFICACIONES
+        // ==========================================
+        function activarNotificaciones() {
+            if (!("Notification" in window)) {
+                alert("Tu navegador no soporta notificaciones 😢");
+                return;
+            }
+
+            Notification.requestPermission().then(permiso => {
+                if (permiso === "granted") {
+                    document.getElementById('btn-notif').classList.add('activo');
+                    
+                    // Obtener Token de Firebase
+                    getToken(messaging, { vapidKey: VAPID_KEY }).then((currentToken) => {
+                        if (currentToken) {
+                            console.log('Token obtenido:', currentToken);
+                            guardarTokenEnSheets(currentToken);
+                        } else {
+                            console.log('No se pudo obtener el token.');
+                        }
+                    }).catch((err) => {
+                        console.error('Error al obtener token:', err);
+                    });
+
+                } else {
+                    alert("Debes permitir las notificaciones para que te avisemos.");
+                }
+            });
+        }
+
+        function guardarTokenEnSheets(token) {
+            const datos = { action: "saveFcmToken", token: token };
+            fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    console.log("Token guardado en Google Sheets");
+                    new Notification("¡Notificaciones Activadas! 💖", {
+                        body: "Ahora recibirás alertas de pedidos próximos.",
+                        icon: "favicon.png"
+                    });
+                }
+            })
+            .catch(err => console.error("Error al guardar token:", err));
+        }
+
+        // ==========================================
+        // NAVEGACIÓN Y LÓGICA EXISTENTE
+        // ==========================================
         function cambiarSeccion(idSeccion, btn) {
             document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -268,7 +358,6 @@
             else actualizarTotalMes();
         }
 
-        // --- LÓGICA DE GANANCIAS ---
         let mostrarTotal = false;
         let valorTotalMes = 0;
         document.getElementById('fecha').valueAsDate = new Date();
@@ -331,7 +420,6 @@
                 .finally(() => { btn.textContent = "✨ Guardar Ganancia ✨"; btn.disabled = false; });
         });
 
-        // --- UTILIDAD DE FECHAS ---
         function fechaParaInput(fechaRaw) {
             if (!fechaRaw) return "";
             const d = new Date(fechaRaw);
@@ -342,7 +430,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // --- LÓGICA DE PEDIDOS ---
         document.getElementById('fechaPedido').valueAsDate = new Date();
 
         function cargarPedidos() {
@@ -457,7 +544,6 @@
             }
         }
 
-        // --- LÓGICA DE INVENTARIO ---
         function cargarInventario() {
             const contenedor = document.getElementById('lista-inventario');
             contenedor.innerHTML = "<p class='cargando'>Cargando inventario...</p>";
