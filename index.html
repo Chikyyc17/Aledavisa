@@ -60,7 +60,7 @@
         .card h2 { margin-top: 0; font-family: 'Playfair Display', serif; text-align: center; font-size: 1.4rem; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; color: #555; }
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px;
             font-family: 'Poppins', sans-serif; box-sizing: border-box; font-size: 16px;
             background-color: #fafafa; transition: border-color 0.3s;
@@ -84,7 +84,18 @@
             margin-top: 10px; display: none; font-family: 'Poppins', sans-serif;
         }
 
-        /* TARJETAS GENERALES (PEDIDOS E INVENTARIO) */
+        /* ESTILOS DE LA BARRA DE BÚSQUEDA */
+        .search-container {
+            max-width: 500px; margin: 0 auto 15px;
+        }
+        .search-container input {
+            width: 100%; padding: 14px 20px; border: 2px solid var(--celeste); border-radius: 30px;
+            font-family: 'Poppins', sans-serif; font-size: 16px; box-sizing: border-box;
+            outline: none; transition: border-color 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background-color: var(--blanco);
+        }
+        .search-container input:focus { border-color: var(--rosa); }
+
         .item-card {
             background: var(--blanco); max-width: 500px; margin: 0 auto 15px;
             padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
@@ -219,7 +230,7 @@
                     </div>
                     <div class="form-group">
                         <label>Unidad</label>
-                        <select id="invUnidad" style="width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-family: 'Poppins'; font-size: 16px; background: #fafafa;">
+                        <select id="invUnidad">
                             <option value="Unidades">Unidades</option>
                             <option value="Metros">Metros</option>
                             <option value="Conos">Conos</option>
@@ -238,7 +249,14 @@
                 <div id="msg-inv-error" class="error">Ups, hubo un error.</div>
             </form>
         </div>
+        
         <h3 style="text-align: center; color: #666; margin-top: 30px;">Materiales en el Taller</h3>
+        
+        <!-- NUEVA BARRA DE BÚSQUEDA -->
+        <div class="search-container">
+            <input type="text" id="buscador-inventario" placeholder="🔍 Buscar material o color..." oninput="filtrarInventario()">
+        </div>
+        
         <div id="lista-inventario"></div>
     </div>
 
@@ -466,34 +484,63 @@
             fetch(urlAntiCache, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
-                    if(data.status === "success" && data.items.length > 0) {
-                        inventarioGlobal = data.items;
-                        contenedor.innerHTML = "";
-                        
-                        data.items.forEach(item => {
-                            const cant = parseFloat(item.cantidad) || 0;
-                            const min = parseFloat(item.stockMinimo) || 0;
-                            const esBajo = cant <= min;
-                            
-                            const div = document.createElement('div');
-                            div.className = `item-card ${esBajo ? 'alerta-stock' : ''}`;
-                            div.innerHTML = `
-                                <div class="item-info">
-                                    <h4>${item.nombre}</h4>
-                                    <span class="dato ${esBajo ? 'rojo' : ''}">
-                                        Stock: ${cant} ${item.unidad} ${esBajo ? '⚠️ (¡Comprar más!)' : ''}
-                                    </span>
-                                    <p style="margin-top: 5px;">Mínimo requerido: ${min} ${item.unidad}</p>
-                                </div>
-                                <div class="acciones">
-                                    <button class="btn-accion btn-editar" onclick="prepararEdicionInv('${item.id}')">✏️</button>
-                                    <button class="btn-accion btn-borrar" onclick="borrarItem('${item.id}')">🗑️</button>
-                                </div>`;
-                            contenedor.appendChild(div);
-                        });
-                    } else { contenedor.innerHTML = "<p class='cargando'>No hay materiales registrados.</p>"; }
+                    if(data.status === "success") {
+                        inventarioGlobal = data.items || [];
+                        renderizarInventario(inventarioGlobal); // Llamamos a la función que dibuja
+                    } else { 
+                        contenedor.innerHTML = "<p class='cargando'>No hay materiales registrados.</p>"; 
+                    }
                 })
                 .catch(err => { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar inventario.</p>"; });
+        }
+
+        // NUEVA FUNCIÓN: Dibuja el HTML del inventario (la usamos para cargar y para filtrar)
+        function renderizarInventario(items) {
+            const contenedor = document.getElementById('lista-inventario');
+            contenedor.innerHTML = "";
+
+            if(items.length === 0) {
+                contenedor.innerHTML = "<p class='cargando'>No se encontraron materiales.</p>";
+                return;
+            }
+
+            items.forEach(item => {
+                const cant = parseFloat(item.cantidad) || 0;
+                const min = parseFloat(item.stockMinimo) || 0;
+                const esBajo = cant <= min;
+                
+                const div = document.createElement('div');
+                div.className = `item-card ${esBajo ? 'alerta-stock' : ''}`;
+                div.innerHTML = `
+                    <div class="item-info">
+                        <h4>${item.nombre}</h4>
+                        <span class="dato ${esBajo ? 'rojo' : ''}">
+                            Stock: ${cant} ${item.unidad} ${esBajo ? '⚠️ (¡Comprar más!)' : ''}
+                        </span>
+                        <p style="margin-top: 5px;">Mínimo requerido: ${min} ${item.unidad}</p>
+                    </div>
+                    <div class="acciones">
+                        <button class="btn-accion btn-editar" onclick="prepararEdicionInv('${item.id}')">✏️</button>
+                        <button class="btn-accion btn-borrar" onclick="borrarItem('${item.id}')">🗑️</button>
+                    </div>`;
+                contenedor.appendChild(div);
+            });
+        }
+
+        // NUEVA FUNCIÓN: Filtra los materiales según lo que se escriba
+        function filtrarInventario() {
+            const termino = document.getElementById('buscador-inventario').value.toLowerCase().trim();
+            
+            if(termino === "") {
+                // Si está vacío, mostramos todo
+                renderizarInventario(inventarioGlobal);
+            } else {
+                // Filtramos por nombre (que incluye hilos, telas, colores, etc)
+                const filtrados = inventarioGlobal.filter(item => 
+                    item.nombre.toLowerCase().includes(termino)
+                );
+                renderizarInventario(filtrados);
+            }
         }
 
         function prepararEdicionInv(id) {
@@ -540,7 +587,12 @@
                 .then(data => {
                     if(data.status === "success") {
                         document.getElementById('msg-inv-exito').style.display = "block";
-                        cancelarEdicionInv(); cargarInventario(); 
+                        cancelarEdicionInv(); 
+                        
+                        // Limpiamos el buscador al guardar
+                        document.getElementById('buscador-inventario').value = ""; 
+                        cargarInventario(); 
+                        
                         setTimeout(() => document.getElementById('msg-inv-exito').style.display = "none", 3000);
                     } else { throw new Error(); }
                 })
