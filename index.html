@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aledavisa C.A. - App</title>
     
-    <!-- FAVICON Y PWA -->
     <link rel="icon" type="image/jpg" href="iconapp.jpg">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#001aff">
@@ -22,10 +21,8 @@
                               radial-gradient(circle at bottom left, rgba(255, 43, 182, 0.1), transparent 40%);
             margin: 0; padding: 20px; color: var(--texto); min-height: 100vh;
         }
-        
         .header { text-align: center; margin-bottom: 20px; }
         .logo { max-width: 250px; width: 100%; height: auto; margin-bottom: 10px; }
-        
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
         .tab-btn {
             padding: 12px 20px; border: none; border-radius: 30px;
@@ -37,7 +34,6 @@
             background: linear-gradient(90deg, var(--azul-rey), var(--rosa));
             color: white; box-shadow: 0 5px 15px rgba(255, 43, 182, 0.3);
         }
-
         .seccion { display: none; animation: fadeIn 0.4s; }
         .seccion.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -52,7 +48,6 @@
         .monto-container { display: flex; justify-content: center; align-items: center; gap: 15px; }
         .monto { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 600; color: var(--azul-rey); margin: 0; line-height: 1; }
         .btn-ojo { background: none; border: none; font-size: 1.8rem; cursor: pointer; opacity: 0.6; }
-
         .desglose-total {
             margin: 15px 0 0; font-size: 0.85rem; color: #666;
             padding-top: 12px; border-top: 1px dashed #ddd;
@@ -72,12 +67,10 @@
             background-color: #fafafa; transition: border-color 0.3s;
         }
         .form-group input:focus, .form-group textarea:focus { border-color: var(--celeste); outline: none; background: #fff; }
-
         .input-readonly {
             background: #f0f0f0 !important; color: var(--rojo) !important;
             font-weight: 600; cursor: not-allowed;
         }
-        
         .form-row { display: flex; gap: 10px; }
         .form-row .form-group { flex: 1; }
 
@@ -88,7 +81,6 @@
         }
         .btn-principal:hover { transform: translateY(-2px); }
         .btn-principal:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
-        
         .btn-cancelar {
             width: 100%; padding: 12px; background: #eee; color: #555; border: none;
             border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
@@ -112,12 +104,12 @@
         .item-card.urgente { border-left-color: var(--rosa); }
         .item-card.alerta-stock { border-left-color: var(--rojo); background: #fff5f5; }
         .item-card.cobrar { border-left-color: #f39c12; }
-        
+
         .item-info h4 { margin: 0 0 5px; font-size: 1.1rem; color: var(--texto); }
         .item-info p { margin: 0; font-size: 0.85rem; color: #666; }
         .item-info .dato { font-weight: 600; color: var(--azul-rey); margin-top: 5px; display: block; }
         .item-info .dato.rojo { color: var(--rojo); }
-        
+
         .acciones { display: flex; gap: 10px; }
         .btn-accion { border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: background 0.3s; }
         .btn-editar { background: #e8f8f5; color: #1abc9c; }
@@ -132,7 +124,7 @@
         .exito { background: #e8f8f5; color: #1abc9c; }
         .error { background: #fdedec; color: #e74c3c; }
         .cargando { text-align: center; color: #888; font-style: italic; margin-top: 20px; }
-        
+
         @media (max-width: 600px) {
             .monto { font-size: 2.8rem; }
             .item-card { flex-direction: column; align-items: flex-start; gap: 15px; }
@@ -163,7 +155,7 @@
                 <button id="btn-ojo" class="btn-ojo">👁️</button>
             </div>
             <p class="desglose-total" id="desglose-mes">
-                Cobrado: <b>$0.00</b> · Por cobrar: <b>$0.00</b>
+                Recibido: <b>$0.00</b> · Por cobrar: <b>$0.00</b>
             </p>
         </div>
 
@@ -183,7 +175,7 @@
                     <input type="text" id="descripcion" placeholder="Ej: Vestido de flores" required>
                 </div>
                 <div class="form-group">
-                    <label>Mano de Obra Total ($)</label>
+                    <label>Mano de Obra / Total a Cobrar ($)</label>
                     <input type="number" id="manoObra" placeholder="Ej: 30.00" step="0.01" min="0" required>
                 </div>
                 <div class="form-row">
@@ -274,20 +266,16 @@
                 <div id="msg-inv-error" class="error">Ups, hubo un error.</div>
             </form>
         </div>
-        
         <h3 style="text-align: center; color: #666; margin-top: 30px;">Materiales en el Taller</h3>
-        
         <div class="search-container">
             <input type="text" id="buscador-inventario" placeholder="🔍 Buscar material o color..." oninput="filtrarInventario()">
         </div>
-        
         <div id="lista-inventario"></div>
     </div>
 
     <script>
         const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbwR_RBJo7ShRWJ1p0OOfqRpXXPwMFX9OEWhTpiHA71MC4InUzEMWf0ggSrQuGy-ZC7T/exec"; 
-        
-        // REGISTRAR SERVICE WORKER PARA LA PWA
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
@@ -304,13 +292,12 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('seccion-' + idSeccion).classList.add('active');
             btn.classList.add('active');
-
             if(idSeccion === 'pedidos') cargarPedidos();
             else if(idSeccion === 'inventario') cargarInventario();
             else { actualizarTotalMes(); cargarPendientes(); }
         }
 
-        // --- LÓGICA DE GANANCIAS ---
+        // --- GANANCIAS ---
         let mostrarTotal = false;
         let datosMes = { facturado: 0, cobrado: 0, pendiente: 0 };
         document.getElementById('fecha').valueAsDate = new Date();
@@ -321,10 +308,10 @@
             if (mostrarTotal) {
                 const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
                 displayTotal.textContent = fmt.format(datosMes.facturado);
-                desglose.innerHTML = `Cobrado: <b>${fmt.format(datosMes.cobrado)}</b> · Por cobrar: <b>${fmt.format(datosMes.pendiente)}</b>`;
+                desglose.innerHTML = `Recibido: <b>${fmt.format(datosMes.cobrado)}</b> · Por cobrar: <b>${fmt.format(datosMes.pendiente)}</b>`;
             } else {
                 displayTotal.textContent = "••••••";
-                desglose.innerHTML = `Cobrado: <b>••••</b> · Por cobrar: <b>••••</b>`;
+                desglose.innerHTML = `Recibido: <b>••••</b> · Por cobrar: <b>••••</b>`;
             }
         }
 
@@ -333,6 +320,7 @@
             fetch(urlAntiCache, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
+                    console.log('getEarnings:', data);
                     if (data.status === "success") {
                         datosMes.facturado = data.totalMes || 0;
                         datosMes.cobrado   = data.totalCobrado || 0;
@@ -340,14 +328,17 @@
                         renderizarTotal();
                     } else { datosMes = { facturado: 0, cobrado: 0, pendiente: 0 }; renderizarTotal(); }
                 })
-                .catch(err => { document.getElementById('total-mes').textContent = "Error"; });
+                .catch(err => {
+                    console.error('Error getEarnings:', err);
+                    document.getElementById('total-mes').textContent = "Error";
+                });
         }
 
         function actualizarDebe() {
-            const total = parseFloat(document.getElementById('manoObra').value) || 0;
+            const manoObra = parseFloat(document.getElementById('manoObra').value) || 0;
             let abono = parseFloat(document.getElementById('abono').value) || 0;
-            if (abono > total) abono = total;
-            const debe = Math.max(0, total - abono);
+            if (abono > manoObra) abono = manoObra;
+            const debe = Math.max(0, manoObra - abono);
             document.getElementById('debeCalculado').value = `$${debe.toFixed(2)}`;
         }
         document.getElementById('manoObra').addEventListener('input', actualizarDebe);
@@ -374,6 +365,7 @@
             fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
                 .then(res => res.json())
                 .then(data => {
+                    console.log('saveEarning:', data);
                     if (data.status === "success") {
                         document.getElementById('mensaje-exito').style.display = "block";
                         document.getElementById('formulario-ventas').reset();
@@ -382,9 +374,10 @@
                         actualizarTotalMes();
                         cargarPendientes();
                         setTimeout(() => document.getElementById('mensaje-exito').style.display = "none", 3000);
-                    } else { throw new Error(); }
+                    } else { throw new Error(data.message || 'Error'); }
                 })
                 .catch(err => {
+                    console.error('Error saveEarning:', err);
                     document.getElementById('mensaje-error').style.display = "block";
                     setTimeout(() => document.getElementById('mensaje-error').style.display = "none", 3000);
                 })
@@ -400,10 +393,11 @@
             fetch(url, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
+                    console.log('getPendingEarnings:', data);
                     if (data.status === "success" && data.pending.length > 0) {
                         contenedor.innerHTML = "";
                         data.pending.forEach(item => {
-                            const total = parseFloat(item.manoObra) || 0;
+                            const total = parseFloat(item.total) || 0;
                             const abono = parseFloat(item.abono) || 0;
                             const debe  = parseFloat(item.debe) || 0;
                             const div = document.createElement('div');
@@ -425,6 +419,7 @@
                     }
                 })
                 .catch(err => {
+                    console.error('Error getPendingEarnings:', err);
                     contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar cuentas.</p>";
                 });
         }
@@ -457,7 +452,7 @@
                 .catch(() => alert("Error de conexión"));
         }
 
-        // --- UTILIDAD DE FECHAS ---
+        // --- UTILIDAD FECHAS ---
         function fechaParaInput(fechaRaw) {
             if (!fechaRaw) return "";
             const d = new Date(fechaRaw);
@@ -468,7 +463,7 @@
             return `${year}-${month}-${day}`;
         }
 
-        // --- LÓGICA DE PEDIDOS ---
+        // --- PEDIDOS ---
         document.getElementById('fechaPedido').valueAsDate = new Date();
 
         function cargarPedidos() {
@@ -489,14 +484,12 @@
                             const fechaLimpia = fechaParaInput(pedido.fechaEntrega);
                             const fechaEntregaObj = new Date(fechaLimpia + 'T00:00:00');
                             const diffDias = Math.ceil((fechaEntregaObj - hoy) / (1000 * 60 * 60 * 24));
-                            
                             let claseUrgente = ""; let textoDias = "";
                             if(diffDias <= 2 && diffDias >= 0) {
                                 claseUrgente = "urgente"; textoDias = diffDias === 0 ? "(¡HOY!)" : `(En ${diffDias} días)`;
                             } else if (diffDias < 0) {
                                 claseUrgente = "urgente"; textoDias = "(¡ATRASADO!)";
                             } else { textoDias = `(En ${diffDias} días)`; }
-
                             const fechaFormat = fechaEntregaObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
                             const div = document.createElement('div');
                             div.className = `item-card ${claseUrgente}`;
@@ -583,12 +576,11 @@
             }
         }
 
-        // --- LÓGICA DE INVENTARIO ---
+        // --- INVENTARIO ---
         function cargarInventario() {
             const contenedor = document.getElementById('lista-inventario');
             contenedor.innerHTML = "<p class='cargando'>Cargando inventario...</p>";
             const urlAntiCache = URL_GOOGLE + "?action=getInventory&nocache=" + new Date().getTime();
-
             fetch(urlAntiCache, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
@@ -605,17 +597,14 @@
         function renderizarInventario(items) {
             const contenedor = document.getElementById('lista-inventario');
             contenedor.innerHTML = "";
-
             if(items.length === 0) {
                 contenedor.innerHTML = "<p class='cargando'>No se encontraron materiales.</p>";
                 return;
             }
-
             items.forEach(item => {
                 const cant = parseFloat(item.cantidad) || 0;
                 const min = parseFloat(item.stockMinimo) || 0;
                 const esBajo = cant <= min;
-                
                 const div = document.createElement('div');
                 div.className = `item-card ${esBajo ? 'alerta-stock' : ''}`;
                 div.innerHTML = `
@@ -636,14 +625,8 @@
 
         function filtrarInventario() {
             const termino = document.getElementById('buscador-inventario').value.toLowerCase().trim();
-            if(termino === "") {
-                renderizarInventario(inventarioGlobal);
-            } else {
-                const filtrados = inventarioGlobal.filter(item => 
-                    item.nombre.toLowerCase().includes(termino)
-                );
-                renderizarInventario(filtrados);
-            }
+            if(termino === "") renderizarInventario(inventarioGlobal);
+            else renderizarInventario(inventarioGlobal.filter(i => i.nombre.toLowerCase().includes(termino)));
         }
 
         function prepararEdicionInv(id) {
@@ -654,7 +637,6 @@
             document.getElementById('invCantidad').value = item.cantidad;
             document.getElementById('invUnidad').value = item.unidad;
             document.getElementById('invStockMin').value = item.stockMinimo;
-            
             document.getElementById('titulo-form-inv').textContent = "Modificar Material";
             document.getElementById('btn-guardar-inv').textContent = "💾 Actualizar Material 💾";
             document.getElementById('btn-cancelar-inv').style.display = "block";
@@ -675,7 +657,6 @@
             btn.textContent = "Guardando..."; btn.disabled = true;
             const idEdicion = document.getElementById('idInvEdicion').value;
             const esEdicion = idEdicion !== "";
-
             const datos = {
                 action: esEdicion ? "updateItem" : "saveItem",
                 id: esEdicion ? idEdicion : null,
@@ -684,7 +665,6 @@
                 unidad: document.getElementById('invUnidad').value,
                 stockMinimo: document.getElementById('invStockMin').value
             };
-
             fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
                 .then(res => res.json())
                 .then(data => {
