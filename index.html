@@ -53,6 +53,12 @@
         .monto { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 600; color: var(--azul-rey); margin: 0; line-height: 1; }
         .btn-ojo { background: none; border: none; font-size: 1.8rem; cursor: pointer; opacity: 0.6; }
 
+        .desglose-total {
+            margin: 15px 0 0; font-size: 0.85rem; color: #666;
+            padding-top: 12px; border-top: 1px dashed #ddd;
+        }
+        .desglose-total b { color: var(--azul-rey); }
+
         .card {
             background: var(--blanco); max-width: 500px; margin: 0 auto 20px;
             padding: 25px; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.05);
@@ -66,6 +72,11 @@
             background-color: #fafafa; transition: border-color 0.3s;
         }
         .form-group input:focus, .form-group textarea:focus { border-color: var(--celeste); outline: none; background: #fff; }
+
+        .input-readonly {
+            background: #f0f0f0 !important; color: var(--rojo) !important;
+            font-weight: 600; cursor: not-allowed;
+        }
         
         .form-row { display: flex; gap: 10px; }
         .form-row .form-group { flex: 1; }
@@ -84,10 +95,7 @@
             margin-top: 10px; display: none; font-family: 'Poppins', sans-serif;
         }
 
-        /* ESTILOS DE LA BARRA DE BÚSQUEDA */
-        .search-container {
-            max-width: 500px; margin: 0 auto 15px;
-        }
+        .search-container { max-width: 500px; margin: 0 auto 15px; }
         .search-container input {
             width: 100%; padding: 14px 20px; border: 2px solid var(--celeste); border-radius: 30px;
             font-family: 'Poppins', sans-serif; font-size: 16px; box-sizing: border-box;
@@ -103,6 +111,7 @@
         }
         .item-card.urgente { border-left-color: var(--rosa); }
         .item-card.alerta-stock { border-left-color: var(--rojo); background: #fff5f5; }
+        .item-card.cobrar { border-left-color: #f39c12; }
         
         .item-info h4 { margin: 0 0 5px; font-size: 1.1rem; color: var(--texto); }
         .item-info p { margin: 0; font-size: 0.85rem; color: #666; }
@@ -153,6 +162,9 @@
                 <p class="monto" id="total-mes">••••••</p>
                 <button id="btn-ojo" class="btn-ojo">👁️</button>
             </div>
+            <p class="desglose-total" id="desglose-mes">
+                Cobrado: <b>$0.00</b> · Por cobrar: <b>$0.00</b>
+            </p>
         </div>
 
         <div class="card">
@@ -171,14 +183,27 @@
                     <input type="text" id="descripcion" placeholder="Ej: Vestido de flores" required>
                 </div>
                 <div class="form-group">
-                    <label>Mano de Obra ($)</label>
-                    <input type="number" id="manoObra" placeholder="Ej: 15.00" step="0.01" min="0" required>
+                    <label>Mano de Obra Total ($)</label>
+                    <input type="number" id="manoObra" placeholder="Ej: 30.00" step="0.01" min="0" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Abono Inicial ($)</label>
+                        <input type="number" id="abono" placeholder="0.00" step="0.01" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Saldo Pendiente ($)</label>
+                        <input type="text" id="debeCalculado" class="input-readonly" readonly value="$0.00">
+                    </div>
                 </div>
                 <button type="submit" class="btn-principal" id="btn-guardar">✨ Guardar Ganancia ✨</button>
                 <div id="mensaje-exito" class="exito">¡Guardado con éxito! 🎉</div>
                 <div id="mensaje-error" class="error">Ups, hubo un error.</div>
             </form>
         </div>
+
+        <h3 style="text-align: center; color: #666; margin-top: 30px;">💸 Cuentas por Cobrar</h3>
+        <div id="lista-pendientes"></div>
     </div>
 
     <!-- SECCIÓN 2: PEDIDOS -->
@@ -252,7 +277,6 @@
         
         <h3 style="text-align: center; color: #666; margin-top: 30px;">Materiales en el Taller</h3>
         
-        <!-- NUEVA BARRA DE BÚSQUEDA -->
         <div class="search-container">
             <input type="text" id="buscador-inventario" placeholder="🔍 Buscar material o color..." oninput="filtrarInventario()">
         </div>
@@ -283,21 +307,24 @@
 
             if(idSeccion === 'pedidos') cargarPedidos();
             else if(idSeccion === 'inventario') cargarInventario();
-            else actualizarTotalMes();
+            else { actualizarTotalMes(); cargarPendientes(); }
         }
 
         // --- LÓGICA DE GANANCIAS ---
         let mostrarTotal = false;
-        let valorTotalMes = 0;
+        let datosMes = { facturado: 0, cobrado: 0, pendiente: 0 };
         document.getElementById('fecha').valueAsDate = new Date();
 
         function renderizarTotal() {
             const displayTotal = document.getElementById('total-mes');
+            const desglose = document.getElementById('desglose-mes');
             if (mostrarTotal) {
-                const formato = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-                displayTotal.textContent = formato.format(valorTotalMes);
+                const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                displayTotal.textContent = fmt.format(datosMes.facturado);
+                desglose.innerHTML = `Cobrado: <b>${fmt.format(datosMes.cobrado)}</b> · Por cobrar: <b>${fmt.format(datosMes.pendiente)}</b>`;
             } else {
                 displayTotal.textContent = "••••••";
+                desglose.innerHTML = `Cobrado: <b>••••</b> · Por cobrar: <b>••••</b>`;
             }
         }
 
@@ -306,13 +333,25 @@
             fetch(urlAntiCache, { cache: "no-store" })
                 .then(res => res.json())
                 .then(data => {
-                    if(data.status === "success") {
-                        valorTotalMes = data.totalMes;
+                    if (data.status === "success") {
+                        datosMes.facturado = data.totalMes || 0;
+                        datosMes.cobrado   = data.totalCobrado || 0;
+                        datosMes.pendiente = data.totalPendiente || 0;
                         renderizarTotal();
-                    } else { valorTotalMes = 0; renderizarTotal(); }
+                    } else { datosMes = { facturado: 0, cobrado: 0, pendiente: 0 }; renderizarTotal(); }
                 })
                 .catch(err => { document.getElementById('total-mes').textContent = "Error"; });
         }
+
+        function actualizarDebe() {
+            const total = parseFloat(document.getElementById('manoObra').value) || 0;
+            let abono = parseFloat(document.getElementById('abono').value) || 0;
+            if (abono > total) abono = total;
+            const debe = Math.max(0, total - abono);
+            document.getElementById('debeCalculado').value = `$${debe.toFixed(2)}`;
+        }
+        document.getElementById('manoObra').addEventListener('input', actualizarDebe);
+        document.getElementById('abono').addEventListener('input', actualizarDebe);
 
         document.getElementById('btn-ojo').addEventListener('click', function() {
             mostrarTotal = !mostrarTotal;
@@ -329,16 +368,19 @@
                 fecha: document.getElementById('fecha').value,
                 nombre: document.getElementById('nombre').value,
                 descripcion: document.getElementById('descripcion').value,
-                manoObra: document.getElementById('manoObra').value
+                manoObra: document.getElementById('manoObra').value,
+                abono: document.getElementById('abono').value || 0
             };
             fetch(URL_GOOGLE, { method: 'POST', body: JSON.stringify(datos) })
                 .then(res => res.json())
                 .then(data => {
-                    if(data.status === "success") {
+                    if (data.status === "success") {
                         document.getElementById('mensaje-exito').style.display = "block";
                         document.getElementById('formulario-ventas').reset();
                         document.getElementById('fecha').valueAsDate = new Date();
+                        document.getElementById('debeCalculado').value = "$0.00";
                         actualizarTotalMes();
+                        cargarPendientes();
                         setTimeout(() => document.getElementById('mensaje-exito').style.display = "none", 3000);
                     } else { throw new Error(); }
                 })
@@ -348,6 +390,72 @@
                 })
                 .finally(() => { btn.textContent = "✨ Guardar Ganancia ✨"; btn.disabled = false; });
         });
+
+        // --- CUENTAS POR COBRAR ---
+        function cargarPendientes() {
+            const contenedor = document.getElementById('lista-pendientes');
+            contenedor.innerHTML = "<p class='cargando'>Cargando cuentas...</p>";
+            const url = URL_GOOGLE + "?action=getPendingEarnings&nocache=" + new Date().getTime();
+
+            fetch(url, { cache: "no-store" })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success" && data.pending.length > 0) {
+                        contenedor.innerHTML = "";
+                        data.pending.forEach(item => {
+                            const total = parseFloat(item.manoObra) || 0;
+                            const abono = parseFloat(item.abono) || 0;
+                            const debe  = parseFloat(item.debe) || 0;
+                            const div = document.createElement('div');
+                            div.className = "item-card cobrar";
+                            div.innerHTML = `
+                                <div class="item-info">
+                                    <h4>${item.nombre}</h4>
+                                    <p>${item.descripcion}</p>
+                                    <span class="dato rojo">Debe: $${debe.toFixed(2)} <small>($${abono.toFixed(2)} de $${total.toFixed(2)})</small></span>
+                                </div>
+                                <div class="acciones">
+                                    <button class="btn-accion btn-editar" title="Abonar" onclick="abonarMas('${item.id}')">💰</button>
+                                    <button class="btn-accion btn-borrar" title="Cobrar todo" onclick="cobrarTodo('${item.id}')">✅</button>
+                                </div>`;
+                            contenedor.appendChild(div);
+                        });
+                    } else {
+                        contenedor.innerHTML = "<p class='cargando'>¡Todo cobrado! 🎉</p>";
+                    }
+                })
+                .catch(err => {
+                    contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar cuentas.</p>";
+                });
+        }
+
+        function abonarMas(id) {
+            const monto = prompt("¿Cuánto abona ahora?");
+            if (monto === null || monto.trim() === '' || isNaN(monto) || parseFloat(monto) <= 0) return;
+            fetch(URL_GOOGLE, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'addPayment', id: id, monto: parseFloat(monto) })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") { cargarPendientes(); actualizarTotalMes(); }
+                    else alert("No se pudo registrar el abono");
+                })
+                .catch(() => alert("Error de conexión"));
+        }
+
+        function cobrarTodo(id) {
+            if (!confirm("¿Marcar esta cuenta como pagada por completo?")) return;
+            fetch(URL_GOOGLE, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'markAsPaid', id: id })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") { cargarPendientes(); actualizarTotalMes(); }
+                })
+                .catch(() => alert("Error de conexión"));
+        }
 
         // --- UTILIDAD DE FECHAS ---
         function fechaParaInput(fechaRaw) {
@@ -486,7 +594,7 @@
                 .then(data => {
                     if(data.status === "success") {
                         inventarioGlobal = data.items || [];
-                        renderizarInventario(inventarioGlobal); // Llamamos a la función que dibuja
+                        renderizarInventario(inventarioGlobal);
                     } else { 
                         contenedor.innerHTML = "<p class='cargando'>No hay materiales registrados.</p>"; 
                     }
@@ -494,7 +602,6 @@
                 .catch(err => { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar inventario.</p>"; });
         }
 
-        // NUEVA FUNCIÓN: Dibuja el HTML del inventario (la usamos para cargar y para filtrar)
         function renderizarInventario(items) {
             const contenedor = document.getElementById('lista-inventario');
             contenedor.innerHTML = "";
@@ -527,15 +634,11 @@
             });
         }
 
-        // NUEVA FUNCIÓN: Filtra los materiales según lo que se escriba
         function filtrarInventario() {
             const termino = document.getElementById('buscador-inventario').value.toLowerCase().trim();
-            
             if(termino === "") {
-                // Si está vacío, mostramos todo
                 renderizarInventario(inventarioGlobal);
             } else {
-                // Filtramos por nombre (que incluye hilos, telas, colores, etc)
                 const filtrados = inventarioGlobal.filter(item => 
                     item.nombre.toLowerCase().includes(termino)
                 );
@@ -588,11 +691,8 @@
                     if(data.status === "success") {
                         document.getElementById('msg-inv-exito').style.display = "block";
                         cancelarEdicionInv(); 
-                        
-                        // Limpiamos el buscador al guardar
                         document.getElementById('buscador-inventario').value = ""; 
                         cargarInventario(); 
-                        
                         setTimeout(() => document.getElementById('msg-inv-exito').style.display = "none", 3000);
                     } else { throw new Error(); }
                 })
@@ -617,6 +717,7 @@
         }
 
         actualizarTotalMes();
+        cargarPendientes();
     </script>
 </body>
 </html>
